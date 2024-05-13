@@ -1,0 +1,44 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "守护助手"
+    },
+    {
+      "name": "permission_reason_camera",
+      "value": "用用你的摄像头"
+    },
+    {
+      "name": "permission_reason_microphone",
+      "value": "用用你的麦克风"
+    },
+    {
+      "name": "permission_reason_calendar",
+      "value": "用于清理过期日程，诈骗日程"
+    },
+    {
+      "name": "permission_reason_contact",
+      "value": "看看你的通讯录"
+    },
+    {
+      "name": "permission_reason_imageVideo",
+      "value": "授权守护助手对照片进行管理"
+    },
+    {
+      "name": "permission_reason_notification",
+      "value": "用用你的通知权限"
+    },
+    {
+      "name": "permission_reason_location",
+      "value": "看看你的位置"
+    }
+  ]
+}

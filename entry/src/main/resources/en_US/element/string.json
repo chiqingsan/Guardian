@@ -1,0 +1,44 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "labelGuardian"
+    },
+    {
+      "name": "permission_reason_imageVideo",
+      "value": "Authorize the guardian assistant to manage the photos"
+    },
+    {
+      "name": "permission_reason_calendar",
+      "value": "It is used to clean up overdue schedules and fraudulent schedules"
+    },
+    {
+      "name": "permission_reason_camera",
+      "value": "Use your webcam"
+    },
+    {
+      "name": "permission_reason_microphone",
+      "value": "Use your microphone"
+    },
+    {
+      "name": "permission_reason_contact",
+      "value": "Take a look at your address book"
+    },
+    {
+      "name": "permission_reason_notification",
+      "value": "Use your notification permissions"
+    },
+    {
+      "name": "permission_reason_location",
+      "value": "Take a look at your location"
+    }
+  ]
+}
