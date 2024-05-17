@@ -34,6 +34,8 @@ export struct MyTabsComp {
   // 获取进程 CPU 占用率
   getCpuUsage() {
     this.cpuUsage = hidebug.getCpuUsage() * 100
+
+
   }
 
   // 获取应用内存大小
@@ -55,10 +57,26 @@ export struct MyTabsComp {
     this.batteryState = batteryInfo.batterySOC
   }
 
+  aboutToAppear(): void {
+    this.getDeviceName()
+    console.info("型号:", this.deviceName)
+    // 查询CPU占用率
+    this.getCpuUsage()
+    // 查询内存占用
+    this.getAppMemorySize()
+    // 查询剩余存储
+    this.getStatfsSize()
+    // 查询电量
+    this.getBatteryState()
+  }
+
   // 父组件下标变化时
   onTabChange() {
     // 重新获取信息
     if (this.currentIndex === 2) {
+      // 查询设备型号
+      // this.getDeviceName()
+      // console.info("型号:", this.deviceName)
       // 查询CPU占用率
       this.getCpuUsage()
       // 查询内存占用
@@ -66,7 +84,6 @@ export struct MyTabsComp {
       // 查询剩余存储
       this.getStatfsSize()
       // 查询电量
-
       this.getBatteryState()
     }
   }
