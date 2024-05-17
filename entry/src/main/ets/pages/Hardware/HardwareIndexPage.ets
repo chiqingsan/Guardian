@@ -5,9 +5,9 @@ import { deviceInfo } from '@kit.BasicServicesKit';
 import { process } from '@kit.ArkTS';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
-import { connection } from '@kit.NetworkKit';
 import { display } from '@kit.ArkUI';
 import { sensor } from '@kit.SensorServiceKit';
+import { connection } from '@kit.NetworkKit';
 
 
 /**
@@ -90,7 +90,7 @@ struct HardwareIndexPage {
     this.getDeviceInfo()
     this.getProcessUptime()
     // 获取网络类型, 模拟器闪退
-    // this.getConnection()
+    this.getConnection()
     this.getDisplayInfo()
     this.getSensorList()
 
@@ -130,17 +130,24 @@ struct HardwareIndexPage {
 
   // 获取网络类型
   getConnection() {
-    // 检测是否有默认连接的网络
-    const hasDefaultNet = connection.hasDefaultNetSync()
-    // 没有网络
-    if (!hasDefaultNet) {
-      // this.netWorkType = '无网络'
-    } else {
-      // this.netWorkType = '有网络'
-      // 获取网络类型
-      this.getConnectionNetBearType()
-      // 获取链路信息
-      this.getConnectionProperties()
+    try {
+      // 检测是否有默认连接的网络
+      const hasDefaultNet = connection.hasDefaultNetSync()
+      // 没有网络
+      if (!hasDefaultNet) {
+        this.netBearType = '无网络'
+        console.error("硬件信息:", "当前无网络")
+      } else {
+        this.netBearType = '有网络'
+        console.info("硬件信息:", "当前有网络")
+        // 获取网络类型
+        this.getConnectionNetBearType()
+        // // 获取链路信息
+        this.getConnectionProperties()
+      }
+    } catch (e) {
+      console.error("查询网络类型出现错误: ", JSON.stringify(e))
+      this.netBearType = "error"
     }
   }
 
@@ -194,6 +201,7 @@ struct HardwareIndexPage {
 
   // 获取传感器信息
   async getSensorList() {
+
     // 获取设备上的所有传感器信息
     const sensorList = await sensor.getSensorList()
     // 提取出传感器的 id

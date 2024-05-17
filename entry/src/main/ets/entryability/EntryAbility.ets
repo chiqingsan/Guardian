@@ -1,10 +1,12 @@
 import { AbilityConstant, UIAbility, Want } from '@kit.AbilityKit';
 import { window } from '@kit.ArkUI';
 import { hilog } from '@kit.PerformanceAnalysisKit';
+import { deviceInfo } from '@kit.BasicServicesKit';
 
 export default class EntryAbility extends UIAbility {
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
     hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onCreate');
+
   }
 
   onDestroy(): void {
@@ -14,6 +16,10 @@ export default class EntryAbility extends UIAbility {
   onWindowStageCreate(windowStage: window.WindowStage): void {
     // Main window is created, set main page for this ability
     hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onWindowStageCreate');
+
+    // 在生命周期里, 查询一下设备型号, 保持到全局变量中, 提供给其他页面使用
+    const phoneName = deviceInfo.marketName
+    AppStorage.setOrCreate("phoneName",phoneName)
 
     windowStage.loadContent('/pages/Index'.slice(1), (err) => {
       if (err.code) {

@@ -18,7 +18,7 @@ export struct MyTabsComp {
   @StorageLink(LOGIN_INFO) loginInfo: LoginInfoResponse = {}
   @StorageLink('topHeight') topHeight: number = 0
   // @Provide 装饰器和 @Consume 装饰器：与后代组件双向同步
-  @Consume @Watch('onTabChange') currentIndex: number
+  @Consume("currentIndex") @Watch('onTabChange') TabsIndex: number
   @State deviceName: string = ''
   @State batteryState: number = 0
   @State memorySize: number = 0
@@ -73,7 +73,7 @@ export struct MyTabsComp {
   // 父组件下标变化时
   onTabChange() {
     // 重新获取信息
-    if (this.currentIndex === 2) {
+    if (this.TabsIndex === 2) {
       // 查询设备型号
       // this.getDeviceName()
       // console.info("型号:", this.deviceName)
@@ -266,9 +266,9 @@ export struct MyTabsComp {
             .endAngle(90)
             .description(null)
             .colors(new LinearGradient([
-              { color: $r('app.color.danger'), offset: 0 },
-              { color: $r('app.color.warning'), offset: 0.2 },
-              { color: $r('app.color.success'), offset: 1 },
+              { color: "#ccFF5E5D", offset: 0 },
+              { color: "#ccFFCE2D", offset: 0.2 },
+              { color: "#cc1EC77A", offset: 1 },
             ]))
             .strokeWidth(12)
             .width(200)
