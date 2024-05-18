@@ -172,6 +172,8 @@ struct HardwareIndexPage {
   getConnectionProperties() {
     // 获取默认网络
     const netHandle = connection.getDefaultNetSync()
+
+    
     // 获取默认网络的链路信息
     const connectionProperties = connection.getConnectionPropertiesSync(netHandle)
     // 提取链路信息

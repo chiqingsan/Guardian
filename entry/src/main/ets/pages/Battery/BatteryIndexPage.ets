@@ -29,6 +29,8 @@ struct BatteryIndexPage {
   // 当前电池的温度
   @State batteryTemperature: number = 0
   timer: number = -1
+  @State Myrotate: number = 0
+  @State Myrotate1: number = 0
 
   onPageShow() {
     themeManager.settingStatusBarWhite()
@@ -73,12 +75,15 @@ struct BatteryIndexPage {
           Row({ space: 10 }) {
             // 剩余电池
             Column({ space: 4 }) {
+
+
               Row()
                 .width(28)
                 .height(12)
                 .backgroundColor($r('app.color.white'))
                 .borderRadius({ topLeft: 6, topRight: 6 })
               Column() {
+
                 Column() {
                   Text(this.batterySOC + '%')
                     .fontSize(32)
@@ -90,6 +95,7 @@ struct BatteryIndexPage {
                 .borderRadius(6)
                 .justifyContent(FlexAlign.Center)
               }
+              .clip(true)
               .width(132)
               .height(186)
               .border({ width: 4, color: $r('app.color.white'), radius: 6 })
@@ -103,7 +109,7 @@ struct BatteryIndexPage {
                 Span(`当前连接充电器的类型: ${this.chargerType}\n`)
                 Span(`当前设备电池的电压: ${this.batteryChargingVoltage / (1000 * 1000)} 伏\n`)
                 Span(`当前设备电池的型号: ${this.batteryModel}\n`)
-                Span(`当前设备电池的温度: ${this.batteryTemperature} ℃`)
+                Span(`当前设备电池的温度: ${this.batteryTemperature / 10} ℃`)
               }.fontSize(14).fontColor($r("app.color.white")).lineHeight(24)
             }.height(200).alignItems(HorizontalAlign.Start).justifyContent(FlexAlign.End)
           }

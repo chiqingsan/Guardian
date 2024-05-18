@@ -43,6 +43,8 @@ struct CleanerScanResultPage {
 
   onPageShow() {
     themeManager.settingStatusBarWhite()
+    // 获取存储相关
+    this.getStatfsSize()
   }
 
   onPageHide() {

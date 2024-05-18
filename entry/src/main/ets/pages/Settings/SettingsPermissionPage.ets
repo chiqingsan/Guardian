@@ -1,6 +1,7 @@
-import { Permissions } from '@kit.AbilityKit';
+import { abilityAccessCtrl, bundleManager, common, Permissions } from '@kit.AbilityKit';
 import { NavigationTitleBuilder } from '../../common/builders';
 import { themeManager } from '../../manager';
+import { permissionManager } from '../../manager/PermissionManager';
 
 interface PermissionItem {
   name: string
@@ -101,18 +102,9 @@ struct SettingsPermissionPage {
             }
             .alignItems(HorizontalAlign.Start)
 
+            // 开启权限开关组件
+            SetToggle({ item: item })
 
-            // 是否已开启权限
-            if (false) {
-              Text('已开启')
-                .fontSize(14)
-                .fontColor($r('app.color.brand'))
-            } else {
-              Toggle({ type: ToggleType.Switch, isOn: false })
-                .onChange(async () => {
-                  // TODO：更新所有权限授权状态
-                })
-            }
           }
           .width('100%')
           .height(64)
@@ -123,7 +115,9 @@ struct SettingsPermissionPage {
           .backgroundColor(Color.Transparent)
           .margin({ top: 20 })
           .onClick(() => {
-            // TODO:关闭权限
+            //关闭权限
+            permissionManager.openPermissionSettingsPage()
+
           })
       }
       .width('100%')
@@ -139,5 +133,40 @@ struct SettingsPermissionPage {
       angle: 180,
       colors: [[$r('app.color.brand'), 0], [$r('app.color.brand_light'), 0.25], [$r('app.color.white'), 0.25]]
     })
+  }
+}
+
+@Component
+struct SetToggle {
+  @State isOn: boolean = false
+  item: PermissionItem = {} as PermissionItem
+
+  aboutToAppear(): void {
+    this.isOn = permissionManager.checkPermissions(this.item.permissions)
+  }
+
+  build() {
+    // 是否已开启权限
+    if (this.isOn) {
+      Text('已开启')
+        .fontSize(14)
+        .fontColor($r('app.color.brand'))
+    } else {
+      Toggle({ type: ToggleType.Switch, isOn: false })
+        .onChange(async (val) => {
+          // TODO：更新所有权限授权状态
+          if (val) {
+            if (!await permissionManager.requestPermissions(this.item.permissions)) {
+
+              permissionManager.openPermissionSettingsPage()
+            } else {
+              this.isOn = true
+            }
+
+          }
+          // console.log("权限:", this.checkPermissions(item.permissions))
+          // console.info(`${await this.requestPermissions(item.permissions)}`)
+        })
+    }
   }
 }
