@@ -49,7 +49,7 @@ struct CleanerSelectPage {
   // }
 
 
-  // // 获取大尺寸图片，用于压缩
+  // 获取大尺寸图片，用于压缩
   // async getLargeSizeList() {
   //   // 获取图片资源
   //   const photoAssets = await this.getAssets()

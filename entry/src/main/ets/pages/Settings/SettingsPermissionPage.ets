@@ -163,6 +163,8 @@ struct SetToggle {
         this.isShow = await notificationManager.isNotificationEnabled()
       }
     }
+
+    console.info("权限是否开启:", this.item.title, this.isShow)
   }
 
   build() {
@@ -188,6 +190,7 @@ struct SetToggle {
               this.isShow = true
 
             } catch (e) {
+
               if (this.first) {
                 // 只提示已拒绝
                 promptAction.showToast({ message: "权限已拒绝" })
@@ -198,16 +201,15 @@ struct SetToggle {
                 const dialogRes = await promptAction.showDialog({
                   alignment: DialogAlignment.Center,
                   title: '温馨提示',
-                  message: '该权限已被禁止，请在系统设置中打开权限开关',
+                  message: `${this.item.title}权限已被禁止，请在系统设置中打开权限开关`,
                   buttons: [
-                    { text: '取消', color: $r('app.color.font_sub') },
+                    { text: '取消', color: $r('app.color.error') },
                     { text: '立即开启', color: $r('app.color.brand') }
                   ]
                 })
                 // 打开设置页
                 if (dialogRes.index === 1) {
                   permissionManager.openPermissionSettingsPage()
-
                 }
               }
               this.isOn = false

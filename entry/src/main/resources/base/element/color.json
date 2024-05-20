@@ -59,6 +59,10 @@
     {
       "name": "font_sub",
       "value": "#89939C"
+    },
+    {
+      "name": "error",
+      "value": "#ff0000"
     }
   ]
 }
