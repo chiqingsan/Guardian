@@ -5,6 +5,7 @@ import { permissionManager } from '../../manager/PermissionManager';
 import { promptAction } from '@kit.ArkUI';
 import { result } from '@wolfx/lodash';
 import { notificationManager } from '@kit.NotificationKit';
+import { MyPreferences } from '../../common/utils/Preference';
 
 interface PermissionItem {
   name: string
@@ -121,9 +122,19 @@ struct SettingsPermissionPage {
           .fontColor($r('app.color.font_sub'))
           .backgroundColor(Color.Transparent)
           .margin({ top: 20 })
-          .onClick(() => {
+          .onClick(async () => {
             //关闭权限
-            permissionManager.openPermissionSettingsPage()
+            const res = await promptAction.showDialog({
+              message: "建议开启全部权限，关闭权限后会影响应用功能",
+              buttons: [
+                { text: "取消", color: $r("app.color.brand") },
+                { text: "确认", color: "#89939C" }
+              ]
+            })
+
+            if (res.index === 1) {
+              permissionManager.openPermissionSettingsPage()
+            }
 
           })
       }
@@ -146,25 +157,29 @@ struct SettingsPermissionPage {
 
 @Component
 struct SetToggle {
+  // 控制是否是首次开启
   @State first: boolean = true
+  // 控制是否打开开关
   @State isOn: boolean = false
+  // 控制是否切换样式
   @State isShow: boolean = false
   item: PermissionItem = {} as PermissionItem
   @Prop @Watch("updateTheStatus") PageIsShow: boolean = false
 
   aboutToAppear(): void {
+    this.first = MyPreferences.getData(this.item.name, true)
   }
 
   async updateTheStatus() {
     if (this.PageIsShow) {
-      this.isShow = permissionManager.checkPermissions(this.item.permissions)
 
       if (this.item.name === "notification") {
         this.isShow = await notificationManager.isNotificationEnabled()
+      } else {
+        this.isShow = permissionManager.checkPermissions(this.item.permissions)
       }
+      this.isOn = this.isShow
     }
-
-    console.info("权限是否开启:", this.item.title, this.isShow)
   }
 
   build() {
@@ -188,6 +203,8 @@ struct SetToggle {
                 // 如果开启则切换显示
               }
               this.isShow = true
+              this.first = false
+              MyPreferences.saveData(this.item.name, this.first)
 
             } catch (e) {
 
@@ -196,6 +213,7 @@ struct SetToggle {
                 promptAction.showToast({ message: "权限已拒绝" })
                 // 第一次打开改为否
                 this.first = false
+                MyPreferences.saveData(this.item.name, this.first)
               } else {
                 // 未开启弹窗提示
                 const dialogRes = await promptAction.showDialog({
