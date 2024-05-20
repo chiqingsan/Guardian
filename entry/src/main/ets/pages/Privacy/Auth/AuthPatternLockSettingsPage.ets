@@ -8,6 +8,7 @@ interface RouterParams {
 @Entry
 @Component
 struct AuthPatternLockSettingsPage {
+  @StorageProp("topHeight") topHeight: number = 0
   // 获取隐私空间设置
   @StorageLink(PRIVACY_SETTINGS) privacySettings: PrivacySettings = {}
   // 正在输入的图形密码
@@ -22,6 +23,62 @@ struct AuthPatternLockSettingsPage {
   private timeoutID: number = -1
   // 控制器
   private patternLockController: PatternLockController = new PatternLockController()
+
+  setErrorMessage(message: string) {
+    this.errorMessage = message
+    this.patternLockController.setChallengeResult(PatternLockChallengeResult.WRONG)
+  }
+
+  clearErrorMessage() {
+    this.errorMessage = ''
+    this.patternLockController.setChallengeResult(PatternLockChallengeResult.CORRECT)
+  }
+
+  // 重置图形密码和临时密码
+  resetPattern() {
+    // 每次输入结束后，自动清空界面图形
+    this.timeoutID = setTimeout(() => {
+      // 重置图形密码
+      this.patternLockController.reset()
+      // 重置临时密码
+      this.inputPassword = []
+    }, 1200)
+  }
+
+  // 手势密码输入完成
+  onPatternComplete(input: number[]) {
+    // 保存临时密码
+    this.inputPassword = input
+    // 1. 校验长度，输入长度小于 4，提示重新输入
+    if (this.inputPassword.length < 4) {
+      // 设置错误提示
+      this.setErrorMessage('手势密码长度不能小于4位，请重新输入')
+    } else {
+      // 清空错误提示
+      this.clearErrorMessage()
+      // 2. 长度符合规范，同时判断是否为首次输入
+      if (this.firstPassword.length === 0) {
+        // 2.1 首次输入，直接保存当前输入的密码
+        this.firstPassword = input
+      } else {
+        // 2.2 非首次输入，需判断两次输入的密码是否相同
+        if (JSON.stringify(this.firstPassword) === JSON.stringify(this.inputPassword)) {
+          // 跳转到密保设置页，并传递当前输入的密码
+          router.pushUrl({
+            url: 'pages/Privacy/Auth/AuthProtectPage', // 跳转密保设置页
+            params: { patternPassword: this.firstPassword }  // 传递密码
+          })
+        } else {
+          // 2.2.2 如果不同，重置第一次输入的密码
+          this.firstPassword = []
+          // 显示错误原因，且 1s 后提示自动消失
+          this.setErrorMessage('两次手势密码不一致，请重新输入')
+        }
+      }
+    }
+    // 每次输入结束后，自动清空界面图形
+    this.resetPattern()
+  }
 
   build() {
     Navigation() {
@@ -60,6 +117,10 @@ struct AuthPatternLockSettingsPage {
           })
           .onPatternComplete((input: number[]) => {
             // TODO：密码输入结束时触发该回调
+            // AlertDialog.show({ message: JSON.stringify(input, null, 2) })
+            this.onPatternComplete(input)
+            this.resetPattern()
+
           })
       }
       .padding({ top: 140 })
@@ -67,5 +128,6 @@ struct AuthPatternLockSettingsPage {
     .title('隐私空间')
     .titleMode(NavigationTitleMode.Mini)
     .mode(NavigationMode.Stack)
+    .padding({ top: this.topHeight })
   }
 }

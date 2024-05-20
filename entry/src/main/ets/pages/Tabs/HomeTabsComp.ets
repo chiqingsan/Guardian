@@ -8,6 +8,7 @@ interface IconItem {
   url: string
 }
 
+
 @Component
 export struct HomeTabsComp {
   @StorageLink('topHeight') topHeight: number = 0
@@ -117,8 +118,13 @@ struct HomeEntry {
   }
 }
 
+
+// 通过持久化存储隐私空间的状态
+PersistentStorage.persistProp('isHidePrivacy', false)
+
 @Component
 struct HomeShortcut {
+  @StorageLink('isHidePrivacy') isHidePrivacy: boolean = false
   // 监听 AppStorage 的数据变化，注意 @Watch 的书写位置
   @StorageLink(PRIVACY_SETTINGS) privacySettings: PrivacySettings = {}
   @State list: IconItem[] = [
@@ -153,6 +159,29 @@ struct HomeShortcut {
       url: '/'
     },
   ]
+
+  aboutToAppear(): void {
+
+    // AlertDialog.show({ message: JSON.stringify(this.isHidePrivacy, null, 2) })
+    this.toggleTheDisplay()
+  }
+
+  toggleTheDisplay() {
+    // 隐藏隐私空间入口
+    if (this.isHidePrivacy === true) {
+      this.list[2] = {
+        title: '日历清理',
+        icon: $r('app.media.ic_home_shortcut_rlql'),
+        url: '/'
+      }
+    } else {
+      this.list[2] = {
+        title: '隐私空间',
+        icon: $r('app.media.ic_home_shortcut_yskj'),
+        url: '/pages/Privacy/PrivacyIndexPage'
+      }
+    }
+  }
 
   async openShortcutPage(item: IconItem) {
     // 跳转页面
@@ -211,6 +240,9 @@ struct HomeShortcut {
             // 长按
             LongPressGesture({ duration: 1000 })
               .onAction(() => {
+                // 更新持久化的值
+                this.isHidePrivacy = !this.isHidePrivacy
+                AppStorage.set("isHidePrivacy", this.isHidePrivacy)
                 // 隐藏隐私空间入口
                 if (item.title === '隐私空间') {
                   this.list[index] = {

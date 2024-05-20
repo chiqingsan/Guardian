@@ -1,5 +1,9 @@
 // DONE: 未输入内容时，点击下一步，输入框的 placeholder 文案抖动
 import { PRIVACY_QUESTION_LIST, PRIVACY_SETTINGS, PrivacySettings } from '../../../common/constants';
+import { promptAction, router } from '@kit.ArkUI';
+
+// 初始化持久化存储
+PersistentStorage.persistProp<PrivacySettings>(PRIVACY_SETTINGS, {})
 
 interface RouterParams {
   patternPassword?: number[]
@@ -8,6 +12,7 @@ interface RouterParams {
 @Entry
 @Component
 struct AuthProtect {
+  @StorageProp("topHeight") topHeight: number = 0
   // 双向绑定 Storage 数据
   @StorageLink(PRIVACY_SETTINGS) privacySettings: PrivacySettings = {}
   // 问题下标
@@ -21,6 +26,73 @@ struct AuthProtect {
   // 路由参数
   @State routerParams: RouterParams = {}
 
+  aboutToAppear() {
+    // 获取路由参数
+    const params = router.getParams() as RouterParams
+    if (params) {
+      this.routerParams = params
+    }
+  }
+
+  setErrorMessage(message: string) {
+    this.errorMessage = message
+    this.inputPaddingLeft = 14 // 抖动效果
+  }
+
+  clearErrorMessage() {
+    this.errorMessage = ''
+  }
+
+  // 提交表单
+  onSubmit() {
+    if (this.answerText.trim() === '') {
+      // 空校验提示
+      this.setErrorMessage('请填写问题答案')
+    } else {
+      // 确认密保答案
+      this.confirmAnswer()
+    }
+  }
+
+  // 确认答案
+  async confirmAnswer() {
+    // 弹窗二次确认
+    const dialogRes = await promptAction.showDialog({
+      alignment: DialogAlignment.Center, // 预览器默认居中，模拟器默认靠底部，统一设置居中
+      title: '提示',
+      message: `你设定的密码保护问题如下\n问题：${PRIVACY_QUESTION_LIST[this.activeIndex].value}\n答案：${this.answerText}\n请确保能够牢记！`,
+      buttons: [
+        { text: '取消', color: $r('app.color.font_sub') },
+        { text: '确定', color: $r('app.color.brand') },
+      ]
+    })
+    // 如果点击了确定
+    if (dialogRes.index = 1) {
+      // 持久化存储密码
+      this.savePassword()
+    }
+  }
+
+  // 持久化存储密码
+  savePassword() {
+    // 1. 保存图形密码
+    if (this.routerParams.patternPassword) {
+      // 密码保存前，需要通过 MD5 加密存储
+      this.privacySettings.patternPassword = this.routerParams.patternPassword.toString()
+    }
+    // 2. 保存密保问题 + 答案
+    this.privacySettings.protectQuestionIndex = this.activeIndex // 下标不能加密，因为 MD5 为单向加密
+    this.privacySettings.protectQuestionAnswer = this.answerText // 问题答案需要加密
+    // 3. 跳转页面
+    if (this.routerParams.patternPassword) {
+      // 有路由参数，表示首次设置密保，跳转到隐私空间首页
+      router.pushUrl({ url: 'pages/Privacy/PrivacyIndexPage' })
+    } else {
+      // 没有路由参数，表示修改密保问题，返回上一页即可
+      router.back()
+    }
+  }
+
   @Builder
   NavigationMenus() {
     Row() {
@@ -29,6 +101,7 @@ struct AuthProtect {
         .fontColor($r('app.color.font'))
         .onClick(() => {
           // TODO：完成
+          this.onSubmit()
         })
     }
     .height('100%')
@@ -76,6 +149,7 @@ struct AuthProtect {
               .padding(0)
               .onSubmit(() => {
                 // TODO：提交密保问题答案
+                this.onSubmit()
               })
           }
           .border({ width: { bottom: 1 }, color: $r('app.color.border'), radius: 0 })
@@ -102,5 +176,6 @@ struct AuthProtect {
     .mode(NavigationMode.Stack)
     .menus(this.NavigationMenus)
     .renderFit(RenderFit.LEFT)
+    .padding({ top: this.topHeight })
   }
 }

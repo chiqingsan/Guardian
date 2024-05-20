@@ -2,6 +2,7 @@ import { AbilityConstant, UIAbility, Want } from '@kit.AbilityKit';
 import { window } from '@kit.ArkUI';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { deviceInfo } from '@kit.BasicServicesKit';
+import { PrivacySettings, PRIVACY_SETTINGS } from '../common/constants';
 
 export default class EntryAbility extends UIAbility {
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
@@ -19,13 +20,14 @@ export default class EntryAbility extends UIAbility {
 
     // 在生命周期里, 查询一下设备型号, 保持到全局变量中, 提供给其他页面使用
     const phoneName = deviceInfo.marketName
-    AppStorage.setOrCreate("phoneName",phoneName)
+    AppStorage.setOrCreate("phoneName", phoneName)
 
     windowStage.loadContent('/pages/Index'.slice(1), (err) => {
       if (err.code) {
         hilog.error(0x0000, 'testTag', 'Failed to load the content. Cause: %{public}s', JSON.stringify(err) ?? '');
         return;
       }
+
       hilog.info(0x0000, 'testTag', 'Succeeded in loading the content.');
     });
   }

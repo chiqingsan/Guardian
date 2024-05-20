@@ -10,6 +10,7 @@ interface Item {
 @Entry
 @Component
 struct PrivacyIndexPage {
+  @StorageProp("topHeight") topHeight: number = 0
   @State count: number = 0
   // 列表
   @State list: Item[] = [
@@ -163,5 +164,6 @@ struct PrivacyIndexPage {
     .mode(NavigationMode.Stack)
     .hideBackButton(true)
     .menus(this.NavigationMenus)
+    .padding({ top: this.topHeight })
   }
 }

@@ -3,12 +3,18 @@ export const PRIVACY_SETTINGS = 'PRIVACY_SETTINGS'
 
 // 隐私空间设置类型
 export interface PrivacySettings {
-  patternPassword?: string     // 图案锁密码
+  patternPassword?: string // 图案锁密码
   isOpenUserAuthLock?: boolean // 是否启用指纹或面容ID解锁
   protectQuestionIndex?: number // 密保问题下标
   protectQuestionAnswer?: string // 密保问题答案
   isOpenAntiCracking?: boolean // 是否开启防破解
   antiCrackingLastFailedTimeStamp?: number // 上次失败尝试时间戳
+}
+
+// 密码类型
+export enum PasswordType {
+  Pattern = 'PATTERN',
+  Text = 'TEXT'
 }
 
 /** 密保问题 */
@@ -36,3 +42,4 @@ export const PRIVACY_NOTE_FOLDER = 'privacy_note'
 
 // 隐私密码本的沙箱文件夹
 export const PRIVACY_CODEBOOK_FOLDER = 'privacy_codebook'
+
