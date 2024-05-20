@@ -4,6 +4,7 @@ import { themeManager } from '../../manager';
 import { permissionManager } from '../../manager/PermissionManager';
 import { promptAction } from '@kit.ArkUI';
 import { result } from '@wolfx/lodash';
+import { notificationManager } from '@kit.NotificationKit';
 
 interface PermissionItem {
   name: string
@@ -151,9 +152,16 @@ struct SetToggle {
   item: PermissionItem = {} as PermissionItem
   @Prop @Watch("updateTheStatus") PageIsShow: boolean = false
 
-  updateTheStatus() {
+  aboutToAppear(): void {
+  }
+
+  async updateTheStatus() {
     if (this.PageIsShow) {
       this.isShow = permissionManager.checkPermissions(this.item.permissions)
+
+      if (this.item.name === "notification") {
+        this.isShow = await notificationManager.isNotificationEnabled()
+      }
     }
   }
 
@@ -170,10 +178,13 @@ struct SetToggle {
           // 如果开关为打开
           if (val) {
             try { // 拿到权限开启结果
-              const permissionsResult = await permissionManager.requestPermissions(this.item.permissions)
-
-              AlertDialog.show({ message: JSON.stringify(permissionsResult, null, 2) })
-              // 如果开启则切换显示
+              if (this.item.name === "notification") {
+                await notificationManager.requestEnableNotification()
+              } else {
+                await permissionManager.requestPermissions(this.item.permissions)
+                // AlertDialog.show({ message: JSON.stringify(permissionsResult, null, 2) })
+                // 如果开启则切换显示
+              }
               this.isShow = true
 
             } catch (e) {
@@ -202,37 +213,8 @@ struct SetToggle {
               this.isOn = false
             }
           }
-          // if (val) {
-          //
-          //   try {
-          //     await permissionManager.requestPermissions(this.item.permissions)
-          //     this.isShow = true
-          //
-          //   } catch (e) {
-          //     console.info(JSON.stringify(e))
-          //     // 未开启弹窗提示
-          //     const dialogRes = await promptAction.showDialog({
-          //       alignment: DialogAlignment.Center,
-          //       title: '温馨提示',
-          //       message: '该权限已被禁止，请在系统设置中打开权限开关',
-          //       buttons: [
-          //         { text: '取消', color: $r('app.color.font_sub') },
-          //         { text: '立即开启', color: $r('app.color.brand') }
-          //       ]
-          //     })
-          //     // 打开设置页
-          //     if (dialogRes.index === 1) {
-          //       permissionManager.openPermissionSettingsPage()
-          //       this.isShow = true
-          //     } else {
-          //       this.isOn = false
-          //     }
-          //   }
-          // }
-
-          // console.log("权限:", this.checkPermissions(item.permissions))
-          // console.info(`${await this.requestPermissions(item.permissions)}`)
         })
     }
   }
 }
+
