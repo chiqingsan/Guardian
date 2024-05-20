@@ -15,7 +15,7 @@ struct Index {
   }
 
   onPageHide() {
-    themeManager.disableFullScreen()
+    // themeManager.disableFullScreen()
   }
 
   @Builder

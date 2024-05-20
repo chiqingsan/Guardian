@@ -47,7 +47,10 @@
       {
         "name": "ohos.permission.WRITE_CALENDAR",
         "reason": '$string:permission_reason_calendar',
-        "usedScene": {}
+        "usedScene": {
+          "abilities": ["EntryAbility"],
+          "when":"inuse"
+        }
       },
       // 相机
       {
@@ -71,6 +74,10 @@
         "name": "ohos.permission.LOCATION",
         "reason": '$string:permission_reason_location',
         "usedScene": {}
+      },{
+        "name": "ohos.permission.WRITE_IMAGEVIDEO",
+        "reason": "$string:permission_WRITE_IMAGEVIDEO",
+        "usedScene":{}
       }
     ]
   }

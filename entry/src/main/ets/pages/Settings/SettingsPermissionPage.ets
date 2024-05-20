@@ -2,6 +2,8 @@ import { abilityAccessCtrl, bundleManager, common, Permissions } from '@kit.Abil
 import { NavigationTitleBuilder } from '../../common/builders';
 import { themeManager } from '../../manager';
 import { permissionManager } from '../../manager/PermissionManager';
+import { promptAction } from '@kit.ArkUI';
+import { result } from '@wolfx/lodash';
 
 interface PermissionItem {
   name: string
@@ -14,7 +16,9 @@ interface PermissionItem {
 @Entry
 @Component
 struct SettingsPermissionPage {
+  @StorageProp("topHeight") topHeight: number = 0
   @State isNotificationEnabled: boolean = false
+  @State PageState: boolean = false
   @State permissionList: PermissionItem[] = [
     {
       name: 'notification',
@@ -71,10 +75,12 @@ struct SettingsPermissionPage {
 
   onPageShow() {
     themeManager.settingStatusBarWhite()
+    this.PageState = true
   }
 
   onPageHide() {
     themeManager.settingStatusBarBlack()
+    this.PageState = false
   }
 
   build() {
@@ -103,7 +109,7 @@ struct SettingsPermissionPage {
             .alignItems(HorizontalAlign.Start)
 
             // 开启权限开关组件
-            SetToggle({ item: item })
+            SetToggle({ item: item, PageIsShow: this.PageState })
 
           }
           .width('100%')
@@ -133,37 +139,97 @@ struct SettingsPermissionPage {
       angle: 180,
       colors: [[$r('app.color.brand'), 0], [$r('app.color.brand_light'), 0.25], [$r('app.color.white'), 0.25]]
     })
+    .padding({ top: this.topHeight })
   }
 }
 
 @Component
 struct SetToggle {
+  @State first: boolean = true
   @State isOn: boolean = false
+  @State isShow: boolean = false
   item: PermissionItem = {} as PermissionItem
+  @Prop @Watch("updateTheStatus") PageIsShow: boolean = false
 
-  aboutToAppear(): void {
-    this.isOn = permissionManager.checkPermissions(this.item.permissions)
+  updateTheStatus() {
+    if (this.PageIsShow) {
+      this.isShow = permissionManager.checkPermissions(this.item.permissions)
+    }
   }
 
   build() {
     // 是否已开启权限
-    if (this.isOn) {
+    if (this.isShow) {
       Text('已开启')
         .fontSize(14)
         .fontColor($r('app.color.brand'))
     } else {
-      Toggle({ type: ToggleType.Switch, isOn: false })
+      Toggle({ type: ToggleType.Switch, isOn: $$this.isOn })
         .onChange(async (val) => {
-          // TODO：更新所有权限授权状态
+
+          // 如果开关为打开
           if (val) {
-            if (!await permissionManager.requestPermissions(this.item.permissions)) {
+            try { // 拿到权限开启结果
+              const permissionsResult = await permissionManager.requestPermissions(this.item.permissions)
 
-              permissionManager.openPermissionSettingsPage()
-            } else {
-              this.isOn = true
+              AlertDialog.show({ message: JSON.stringify(permissionsResult, null, 2) })
+              // 如果开启则切换显示
+              this.isShow = true
+
+            } catch (e) {
+              if (this.first) {
+                // 只提示已拒绝
+                promptAction.showToast({ message: "权限已拒绝" })
+                // 第一次打开改为否
+                this.first = false
+              } else {
+                // 未开启弹窗提示
+                const dialogRes = await promptAction.showDialog({
+                  alignment: DialogAlignment.Center,
+                  title: '温馨提示',
+                  message: '该权限已被禁止，请在系统设置中打开权限开关',
+                  buttons: [
+                    { text: '取消', color: $r('app.color.font_sub') },
+                    { text: '立即开启', color: $r('app.color.brand') }
+                  ]
+                })
+                // 打开设置页
+                if (dialogRes.index === 1) {
+                  permissionManager.openPermissionSettingsPage()
+
+                }
+              }
+              this.isOn = false
             }
-
           }
+          // if (val) {
+          //
+          //   try {
+          //     await permissionManager.requestPermissions(this.item.permissions)
+          //     this.isShow = true
+          //
+          //   } catch (e) {
+          //     console.info(JSON.stringify(e))
+          //     // 未开启弹窗提示
+          //     const dialogRes = await promptAction.showDialog({
+          //       alignment: DialogAlignment.Center,
+          //       title: '温馨提示',
+          //       message: '该权限已被禁止，请在系统设置中打开权限开关',
+          //       buttons: [
+          //         { text: '取消', color: $r('app.color.font_sub') },
+          //         { text: '立即开启', color: $r('app.color.brand') }
+          //       ]
+          //     })
+          //     // 打开设置页
+          //     if (dialogRes.index === 1) {
+          //       permissionManager.openPermissionSettingsPage()
+          //       this.isShow = true
+          //     } else {
+          //       this.isOn = false
+          //     }
+          //   }
+          // }
+
           // console.log("权限:", this.checkPermissions(item.permissions))
           // console.info(`${await this.requestPermissions(item.permissions)}`)
         })

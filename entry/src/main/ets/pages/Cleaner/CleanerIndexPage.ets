@@ -3,7 +3,7 @@ import { statfs } from '@kit.CoreFileKit'
 import { photoAccessHelper } from '@kit.MediaLibraryKit'
 import { NavigationTitleBuilder } from '../../common/builders'
 import { formatByteLength, GIGA_BYTE } from '../../common/utils'
-import { themeManager } from '../../manager'
+import { cleanerManager, themeManager } from '../../manager'
 
 interface ClearItem {
   icon: ResourceStr
@@ -15,6 +15,7 @@ interface ClearItem {
 @Entry
 @Component
 struct CleanerScanResultPage {
+  @StorageProp("topHeight") topHeight: number = 0
   // 总大小
   @State totalSize: number = 0
   // 可用大小
@@ -57,6 +58,40 @@ struct CleanerScanResultPage {
     // 字节数转GB
     this.freeSize = statfs.getFreeSizeSync(context.filesDir)
     this.totalSize = statfs.getTotalSizeSync(context.filesDir)
+  }
+
+  async getData() {
+    // 清理工具初始化
+    await cleanerManager.getAssets()
+    // 获取屏幕截图
+    const screenshotList = await cleanerManager.getScreenshotList()
+    // 统计屏幕截图大小
+    const screenshotListSize = screenshotList.reduce((acc, curr) => {
+      const size = curr.get(photoAccessHelper.PhotoKeys.SIZE) as number
+      return acc + size
+    }, 0);
+    // 更新屏幕截图数量
+    this.list[0] = {
+      icon: $r('app.media.ic_clean_pmjt'),
+      name: '屏幕截图',
+      list: screenshotList,
+      size: screenshotListSize
+    }
+
+    // 视频文件统计
+    const videoList = await cleanerManager.getVideoList()
+    // 统计屏幕截图大小
+    const videoListSize = videoList.reduce((acc, curr) => {
+      const size = curr.get(photoAccessHelper.PhotoKeys.SIZE) as number
+      return acc + size
+    }, 0);
+
+    this.list[1] = {
+      icon: $r('app.media.ic_clean_pmlz'),
+      name: '视频文件',
+      list: videoList,
+      size: videoListSize
+    }
   }
 
   build() {
@@ -230,5 +265,6 @@ struct CleanerScanResultPage {
       direction: 180,
       colors: [['#F36F65', 0], ['#F4B265', 0.4], [$r('app.color.white'), 0.4]]
     })
+    .padding({ top: this.topHeight })
   }
 }

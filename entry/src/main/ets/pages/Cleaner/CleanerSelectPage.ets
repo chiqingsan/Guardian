@@ -1,7 +1,9 @@
 import { photoAccessHelper } from '@kit.MediaLibraryKit'
 import { NavigationTitleBuilder } from '../../common/builders'
 import { formatByteLength } from '../../common/utils'
-import { themeManager } from '../../manager'
+import { cleanerManager, themeManager } from '../../manager'
+import { promptAction, router } from '@kit.ArkUI'
+import { deviceInfo } from '@kit.BasicServicesKit'
 
 interface RouterParams {
   name: string
@@ -14,6 +16,50 @@ struct CleanerSelectPage {
   @State list: photoAccessHelper.PhotoAsset[] = []
   @State selectedNames: string[] = []
   @State selectedSize: number = 0
+  @State @Watch('onSelectChange') selectNames: string[] = []
+  @State selectedList: photoAccessHelper.PhotoAsset[] = []
+
+  aboutToAppear() {
+    const params = router.getParams() as RouterParams
+    if (params) {
+      this.routerParams = params
+      this.getList()
+    }
+  }
+
+  onSelectChange() {
+    this.selectedList = this.list.filter((v) => this.selectNames.includes(v.uri))
+    this.selectedSize = this.selectedList.reduce((acc, item) => {
+      return acc + (item.get(photoAccessHelper.PhotoKeys.SIZE) as number) * 0.8
+    }, 0)
+  }
+
+  async getList() {
+    if (this.routerParams?.name === '屏幕截图') {
+      this.list = await cleanerManager.getScreenshotList()
+    } else if (this.routerParams?.name === '视频文件') {
+      this.list = await cleanerManager.getVideoList()
+    }
+  }
+
+  // async deletePhotos() {
+  //   const deleteRes = await cleanerManager.deletePhotos(this.selectNames)
+  //   promptAction.showToast({ message: deleteRes ? '删除成功' : '取消删除' })
+  //   this.list = await cleanerManager.getScreenshotList()
+  // }
+
+
+  // // 获取大尺寸图片，用于压缩
+  // async getLargeSizeList() {
+  //   // 获取图片资源
+  //   const photoAssets = await this.getAssets()
+  //   // 大图片的临界点
+  //   const largeSize = deviceInfo.marketName === 'emulator' ? 500 * KILO_BYTE : 2 * MEGA_BYTE
+  //   // 根据临界点筛选出大图
+  //   return photoAssets.filter(v => {
+  //     return (v.get(photoAccessHelper.PhotoKeys.SIZE) as number) > largeSize
+  //   })
+  // }
 
   onPageShow() {
     themeManager.settingStatusBarWhite()

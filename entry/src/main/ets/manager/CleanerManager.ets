@@ -1,8 +1,9 @@
 import { Permissions } from '@kit.AbilityKit'
 import { dataSharePredicates } from '@kit.ArkData'
 import { promptAction } from '@kit.ArkUI'
-import { photoAccessHelper } from '@kit.MediaLibraryKit'
 import { permissionManager } from '.'
+import photoAccessHelper from '@ohos.file.photoAccessHelper'
+
 
 class CleanerManager {
   // 权限
@@ -71,7 +72,9 @@ class CleanerManager {
     const photoAssets = await this.getAssets()
     // 转换成 PhotoAsset 对象
     const deleteAssets = photoAssets.filter(v => uris.includes(v.uri))
-    await photoAccessHelper.MediaAssetChangeRequest.deleteAssets(getContext(), deleteAssets)
+    // await photoAccessHelper.MediaAssetChangeRequest.deleteAssets(getContext(), deleteAssets)
+    // MediaAssetChangeRequest.deleteAssets(getContext(), deleteAssets)
+    // await photoAccessHelper.MediaAssetChangeRequest.deleteAssets(getContext(), deleteAssets)
   }
 }
 

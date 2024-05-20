@@ -34,8 +34,6 @@ export struct MyTabsComp {
   // 获取进程 CPU 占用率
   getCpuUsage() {
     this.cpuUsage = hidebug.getCpuUsage() * 100
-
-
   }
 
   // 获取应用内存大小

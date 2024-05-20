@@ -11,6 +11,10 @@
     {
       "name": "EntryAbility_label",
       "value": "守护助手"
+    },
+    {
+      "name": "permission_reason_calendar",
+      "value": "没别的意思，就是想看看你的日历"
     }
   ]
 }

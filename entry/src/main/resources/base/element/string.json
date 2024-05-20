@@ -22,7 +22,7 @@
     },
     {
       "name": "permission_reason_calendar",
-      "value": "日历授权原因"
+      "value": "没别的意思，就是想看看你的日历"
     },
     {
       "name": "permission_reason_contact",
@@ -39,6 +39,10 @@
     {
       "name": "permission_reason_location",
       "value": "位置授权原因"
+    },
+    {
+      "name": "permission_WRITE_IMAGEVIDEO",
+      "value": "写入图片和视频"
     }
   ]
 }

@@ -7,6 +7,7 @@ import { LOGIN_INFO, LoginInfoResponse } from '../../common/constants'
 struct SettingsIndexPage {
   // 用户信息持久化
   @StorageLink(LOGIN_INFO) loginInfo: LoginInfoResponse = {}
+  @StorageProp("topHeight") topHeight: number = 0
   @State isWifiNotification: boolean = true
   @State userExperienceImprovementPlan: boolean = true
 
@@ -50,5 +51,6 @@ struct SettingsIndexPage {
     .title('设置')
     .titleMode(NavigationTitleMode.Mini)
     .mode(NavigationMode.Stack)
+    .padding({ top: this.topHeight })
   }
 }
