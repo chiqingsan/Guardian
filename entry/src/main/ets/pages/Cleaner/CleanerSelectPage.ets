@@ -147,8 +147,14 @@ struct CleanerSelectPage {
           .layoutWeight(1)
           .height(42)
           .backgroundColor($r('app.color.danger'))
-          .onClick(() => {
+          .onClick(async () => {
             // TODO：删除选中图片
+            if (this.selectedNames.length) {
+              const res = await cleanerManager.deletePhotos(this.selectedNames)
+              promptAction.showToast({ message: res ? "删除成功" : "取消删除" })
+            } else {
+              promptAction.showToast({ message: "选定图片后才可删除哦~" })
+            }
           })
       }
       .border({ width: { top: 1 }, color: $r('app.color.border') })

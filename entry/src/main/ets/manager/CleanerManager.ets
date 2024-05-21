@@ -71,8 +71,15 @@ class CleanerManager {
     const phAccessHelper = photoAccessHelper.getPhotoAccessHelper(getContext()) // 获取照片访问助手
     // 转换成 PhotoAsset 对象
     const deleteAssets = photoAssets.filter(v => uris.includes(v.uri))
-    // await photoAccessHelper.MediaAssetChangeRequest.deleteAssets(getContext(), deleteAssets)
-    await phAccessHelper.createDeleteRequest(deleteAssets.map(v => v.uri))
+    try {
+      await photoAccessHelper.MediaAssetChangeRequest.deleteAssets(getContext(), deleteAssets)
+      return true
+    } catch (e) {
+      return false
+    }
+
+    // await phAccessHelper.createDeleteRequest(deleteAssets.map(v => v.uri))
+
   }
 }
 
