@@ -8,8 +8,6 @@ import photoAccessHelper from '@ohos.file.photoAccessHelper'
 class CleanerManager {
   // 权限
   private permissions: Permissions[] = ["ohos.permission.READ_IMAGEVIDEO", "ohos.permission.WRITE_IMAGEVIDEO"]
-  // 图片资源
-  private photoAssets: photoAccessHelper.PhotoAsset[] = []
   // 图片字段
   private columns: photoAccessHelper.PhotoKeys[] = [
     photoAccessHelper.PhotoKeys.DATE_ADDED,
@@ -43,7 +41,7 @@ class CleanerManager {
   async getAssets() {
     const context = getContext()
     const phAccessHelper = photoAccessHelper.getPhotoAccessHelper(context) // 获取照片访问助手
-    const predicates = new dataSharePredicates.DataSharePredicates() // 创建数据共享断言
+    const predicates = new dataSharePredicates.DataSharePredicates() // 创建查询条件
     const fetchOption: photoAccessHelper.FetchOptions = {
       fetchColumns: this.columns,
       predicates: predicates
@@ -70,11 +68,11 @@ class CleanerManager {
   // 删除图片
   async deletePhotos(uris: string[]) {
     const photoAssets = await this.getAssets()
+    const phAccessHelper = photoAccessHelper.getPhotoAccessHelper(getContext()) // 获取照片访问助手
     // 转换成 PhotoAsset 对象
     const deleteAssets = photoAssets.filter(v => uris.includes(v.uri))
     // await photoAccessHelper.MediaAssetChangeRequest.deleteAssets(getContext(), deleteAssets)
-    // MediaAssetChangeRequest.deleteAssets(getContext(), deleteAssets)
-    // await photoAccessHelper.MediaAssetChangeRequest.deleteAssets(getContext(), deleteAssets)
+    await phAccessHelper.createDeleteRequest(deleteAssets.map(v => v.uri))
   }
 }
 

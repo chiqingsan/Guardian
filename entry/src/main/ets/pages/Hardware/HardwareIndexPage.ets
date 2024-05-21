@@ -56,6 +56,7 @@ function calculateBroadcastAddress(ipAddress: string, subnetMask: string): strin
 @Entry
 @Component
 struct HardwareIndexPage {
+  @StorageProp("topHeight") topHeight: number = 0
   // 产品名称
   @State marketName: string = '-'
   // 系统版本
@@ -173,7 +174,7 @@ struct HardwareIndexPage {
     // 获取默认网络
     const netHandle = connection.getDefaultNetSync()
 
-    
+
     // 获取默认网络的链路信息
     const connectionProperties = connection.getConnectionPropertiesSync(netHandle)
     // 提取链路信息
@@ -303,6 +304,7 @@ struct HardwareIndexPage {
       angle: 180,
       colors: [[$r('app.color.brand'), 0], [$r('app.color.brand_light'), 0.4], [$r('app.color.white'), 0.4]]
     })
+    .padding({ top: this.topHeight })
   }
 }
 
@@ -324,6 +326,7 @@ struct ListRow {
     .height(40)
     .width('100%')
     .justifyContent(FlexAlign.SpaceBetween)
+
   }
 }
 

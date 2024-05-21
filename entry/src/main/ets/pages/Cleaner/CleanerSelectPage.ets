@@ -12,6 +12,7 @@ interface RouterParams {
 @Entry
 @Component
 struct CleanerSelectPage {
+  @StorageProp("topHeight") topHeight: number = 0
   @State routerParams: RouterParams | null = null
   @State list: photoAccessHelper.PhotoAsset[] = []
   @State selectedNames: string[] = []
@@ -114,9 +115,8 @@ struct CleanerSelectPage {
                   .width('100%')
                   .aspectRatio(1)
                 }
-              })
-              // TODO 加键值会导致编译报错, 不加键值会重新渲染. 需要解决问题
-              //, ((item: photoAccessHelper.PhotoAsset) => item.uri)
+              }, ((item: photoAccessHelper.PhotoAsset) => item.uri))
+
             }
 
             Blank()
@@ -165,5 +165,6 @@ struct CleanerSelectPage {
       angle: 180,
       colors: [[$r('app.color.brand'), 0], [$r('app.color.brand_light'), 0.3], [$r('app.color.white'), 0.3]]
     })
+    .padding({ top: this.topHeight })
   }
 }

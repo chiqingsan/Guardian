@@ -55,6 +55,7 @@ struct AuthProtect {
   }
 
   // 确认答案
+
   async confirmAnswer() {
     // 弹窗二次确认
     const dialogRes = await promptAction.showDialog({

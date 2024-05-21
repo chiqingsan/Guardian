@@ -216,7 +216,7 @@ struct SetToggle {
                 MyPreferences.saveData(this.item.name, this.first)
               } else {
                 // 未开启弹窗提示
-                const dialogRes = await promptAction.showDialog({
+                promptAction.showDialog({
                   alignment: DialogAlignment.Center,
                   title: '温馨提示',
                   message: `${this.item.title}权限已被禁止，请在系统设置中打开权限开关`,
@@ -224,11 +224,12 @@ struct SetToggle {
                     { text: '取消', color: $r('app.color.error') },
                     { text: '立即开启', color: $r('app.color.brand') }
                   ]
+                }).then((res) => {
+                  // 打开设置页
+                  if (res.index === 1) {
+                    permissionManager.openPermissionSettingsPage()
+                  }
                 })
-                // 打开设置页
-                if (dialogRes.index === 1) {
-                  permissionManager.openPermissionSettingsPage()
-                }
               }
               this.isOn = false
             }

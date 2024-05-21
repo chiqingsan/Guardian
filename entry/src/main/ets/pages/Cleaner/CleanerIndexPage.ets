@@ -4,6 +4,8 @@ import { photoAccessHelper } from '@kit.MediaLibraryKit'
 import { NavigationTitleBuilder } from '../../common/builders'
 import { formatByteLength, GIGA_BYTE } from '../../common/utils'
 import { cleanerManager, themeManager } from '../../manager'
+import { dataSharePredicates } from '@kit.ArkData'
+import dayjs from 'dayjs'
 
 interface ClearItem {
   icon: ResourceStr
@@ -42,10 +44,19 @@ struct CleanerScanResultPage {
     },// 2
   ]
 
+
+
+  aboutToAppear(): void {
+    cleanerManager.requestPermissions()
+  }
+
   onPageShow() {
     themeManager.settingStatusBarWhite()
     // 获取存储相关
     this.getStatfsSize()
+    this.getData()
+    // this.example()
+    // AlertDialog.show({ message: JSON.stringify(cleanerManager.getScreenshotList(), null, 2) })
   }
 
   onPageHide() {

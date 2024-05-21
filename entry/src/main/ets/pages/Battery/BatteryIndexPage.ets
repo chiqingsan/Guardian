@@ -5,6 +5,7 @@ import { batteryInfo } from '@kit.BasicServicesKit'
 @Entry
 @Component
 struct BatteryIndexPage {
+  @StorageProp("topHeight") topHeight: number = 0
   // 电池百分比
   @State batterySOC: number = 0
   // 电量消耗速率（假设1%每0.24小时）
@@ -153,5 +154,6 @@ struct BatteryIndexPage {
       angle: 180,
       colors: [[$r('app.color.brand'), 0], [$r('app.color.brand_light'), 1]]
     })
+    .padding({ top: this.topHeight })
   }
 }
