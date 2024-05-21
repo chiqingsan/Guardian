@@ -43,25 +43,6 @@ struct CleanerSelectPage {
     }
   }
 
-  // async deletePhotos() {
-  //   const deleteRes = await cleanerManager.deletePhotos(this.selectNames)
-  //   promptAction.showToast({ message: deleteRes ? '删除成功' : '取消删除' })
-  //   this.list = await cleanerManager.getScreenshotList()
-  // }
-
-
-  // 获取大尺寸图片，用于压缩
-  // async getLargeSizeList() {
-  //   // 获取图片资源
-  //   const photoAssets = await this.getAssets()
-  //   // 大图片的临界点
-  //   const largeSize = deviceInfo.marketName === 'emulator' ? 500 * KILO_BYTE : 2 * MEGA_BYTE
-  //   // 根据临界点筛选出大图
-  //   return photoAssets.filter(v => {
-  //     return (v.get(photoAccessHelper.PhotoKeys.SIZE) as number) > largeSize
-  //   })
-  // }
-
   onPageShow() {
     themeManager.settingStatusBarWhite()
   }
@@ -148,9 +129,13 @@ struct CleanerSelectPage {
           .height(42)
           .backgroundColor($r('app.color.danger'))
           .onClick(async () => {
-            // TODO：删除选中图片
+            // 删除选中图片
             if (this.selectedNames.length) {
               const res = await cleanerManager.deletePhotos(this.selectedNames)
+
+              if (res) {
+                this.list = this.list.filter(item =>!this.selectedNames.includes(item.uri))
+              }
               promptAction.showToast({ message: res ? "删除成功" : "取消删除" })
             } else {
               promptAction.showToast({ message: "选定图片后才可删除哦~" })

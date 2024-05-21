@@ -1,7 +1,7 @@
 import { photoAccessHelper } from '@kit.MediaLibraryKit'
 import { NavigationTitleBuilder } from '../../../common/builders'
 import { formatByteLength } from '../../../common/utils'
-import { themeManager } from '../../../manager'
+import { cleanerManager, themeManager } from '../../../manager'
 import { router } from '@kit.ArkUI'
 
 @Entry
@@ -11,6 +11,10 @@ struct CompressPhotoIndexPage {
   @State list: photoAccessHelper.PhotoAsset[] = []
   @State selectedName: string[] = []
   @State selectedSize: number = 0
+
+  async aboutToAppear() {
+    this.list = await cleanerManager.getLargeSizeList()
+  }
 
   onPageShow() {
     themeManager.settingStatusBarWhite()

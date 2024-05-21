@@ -3,6 +3,8 @@ import { dataSharePredicates } from '@kit.ArkData'
 import { promptAction } from '@kit.ArkUI'
 import { permissionManager } from '.'
 import photoAccessHelper from '@ohos.file.photoAccessHelper'
+import { deviceInfo } from '@kit.BasicServicesKit'
+import { KILO_BYTE, MEGA_BYTE } from '../common/utils'
 
 
 class CleanerManager {
@@ -80,6 +82,18 @@ class CleanerManager {
 
     // await phAccessHelper.createDeleteRequest(deleteAssets.map(v => v.uri))
 
+  }
+
+  // 获取大尺寸图片，用于压缩
+  async getLargeSizeList() {
+    // 获取图片资源
+    const photoAssets = await this.getAssets()
+    // 大图片的临界点
+    const largeSize = deviceInfo.marketName === 'emulator' ? 500 * KILO_BYTE : 2 * MEGA_BYTE
+    // 根据临界点筛选出大图
+    return photoAssets.filter(v => {
+      return (v.get(photoAccessHelper.PhotoKeys.SIZE) as number) > largeSize
+    })
   }
 }
 
