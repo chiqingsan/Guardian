@@ -15,7 +15,7 @@ struct CompressPhotoIndexPage {
   @State selectedSize: number = 0
 
   async aboutToAppear() {
-    this.gitList()
+    this.getList()
   }
 
   onPageShow() {
@@ -26,7 +26,7 @@ struct CompressPhotoIndexPage {
     themeManager.settingStatusBarBlack()
   }
 
-  async gitList() {
+  async getList() {
     this.list = await cleanerManager.getLargeSizeList()
   }
 
@@ -41,6 +41,19 @@ struct CompressPhotoIndexPage {
     await Promise.all(promiseList)
 
     promptAction.showToast({ message: "压缩完成" })
+    promptAction.showDialog({
+      alignment: DialogAlignment.Center,
+      message: `成功压缩${this.selectedName.length}张图片,是否删除原图?`,
+      buttons: [
+        { text: "取消", color: $r("app.color.font_sub") },
+        { text: "确定删除", color: $r("app.color.brand") },
+      ]
+    }).then(async (res) => {
+      if (res.index === 1) {
+        await cleanerManager.deletePhotos(this.selectedName)
+        this.getList()
+      }
+    })
   }
 
   // 全选操作
