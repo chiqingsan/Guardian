@@ -5,6 +5,8 @@ import { permissionManager } from '.'
 import photoAccessHelper from '@ohos.file.photoAccessHelper'
 import { deviceInfo } from '@kit.BasicServicesKit'
 import { KILO_BYTE, MEGA_BYTE } from '../common/utils'
+import { fileIo } from '@kit.CoreFileKit'
+import { image } from '@kit.ImageKit'
 
 
 class CleanerManager {
@@ -94,6 +96,29 @@ class CleanerManager {
     return photoAssets.filter(v => {
       return (v.get(photoAccessHelper.PhotoKeys.SIZE) as number) > largeSize
     })
+  }
+
+  // 压缩图片
+  async compressThePicture(uri: string, quality: number = 80) {
+    const pictureData = fileIo.openSync(uri)
+    const imagePacker = image.createImagePacker()
+    const imageSource = image.createImageSource(pictureData.fd)
+    const imgArr = await imagePacker.packing(imageSource, { format: "image/jpeg", quality })
+
+    // 完成压缩后图片回显
+    // const newImageSource = image.createImageSource(imgArr)
+    // const imgPixelMap = await newImageSource.createPixelMap()
+    // this.imgPixelMap = imgPixelMap
+
+    const phAccessHelper = photoAccessHelper.getPhotoAccessHelper(getContext())
+    const assetUri = await phAccessHelper.createAsset(photoAccessHelper.PhotoType.IMAGE, "jpg", {
+      title: `compressThePicture_${Date.now()}`
+    })
+    const assetFile = fileIo.openSync(assetUri, fileIo.OpenMode.READ_WRITE)
+    fileIo.writeSync(assetFile.fd, imgArr)
+    // 关闭读写的文件实例
+    fileIo.close(assetFile.fd)
+
   }
 }
 

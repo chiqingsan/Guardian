@@ -2,7 +2,9 @@ import { photoAccessHelper } from '@kit.MediaLibraryKit'
 import { NavigationTitleBuilder } from '../../../common/builders'
 import { formatByteLength } from '../../../common/utils'
 import { cleanerManager, themeManager } from '../../../manager'
-import { router } from '@kit.ArkUI'
+import { promptAction, router } from '@kit.ArkUI'
+import { fileIo } from '@kit.CoreFileKit'
+import { image } from '@kit.ImageKit'
 
 @Entry
 @Component
@@ -13,7 +15,7 @@ struct CompressPhotoIndexPage {
   @State selectedSize: number = 0
 
   async aboutToAppear() {
-    this.list = await cleanerManager.getLargeSizeList()
+    this.gitList()
   }
 
   onPageShow() {
@@ -24,7 +26,32 @@ struct CompressPhotoIndexPage {
     themeManager.settingStatusBarBlack()
   }
 
+  async gitList() {
+    this.list = await cleanerManager.getLargeSizeList()
+  }
+
   // TODO：立即瘦身（压缩照片）
+  // 压缩图片
+  async compressThePicture(selectedName: string[]) {
+
+    const promiseList = selectedName.map(async (uri) => {
+      return await cleanerManager.compressThePicture(uri)
+    })
+
+    await Promise.all(promiseList)
+
+    promptAction.showToast({ message: "压缩完成" })
+  }
+
+  // 全选操作
+  selectAll(value: CheckboxGroupResult) {
+    this.selectedName = value.name
+    // 预计压缩后的大小
+    this.selectedSize =
+      this.list.filter(v => value.name.includes(v.uri)).reduce((a: number, b: photoAccessHelper.PhotoAsset) => {
+        return a + (b.get(photoAccessHelper.PhotoKeys.SIZE) as number)
+      }, 0) / 12
+  }
 
   build() {
     Navigation() {
@@ -107,7 +134,7 @@ struct CompressPhotoIndexPage {
             CheckboxGroup()
               .selectedColor($r('app.color.brand'))
               .onChange((value) => {
-                this.selectedName = value.name
+                this.selectAll(value)
               })
             Text('全选')
               .fontSize(14)
@@ -122,6 +149,7 @@ struct CompressPhotoIndexPage {
             .enabled(this.selectedName.length > 0)
             .onClick(() => {
               // TODO：立即瘦身（压缩照片）
+              this.compressThePicture(this.selectedName)
             })
         }
         .width('100%')

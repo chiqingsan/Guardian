@@ -44,6 +44,7 @@
     "pages/Guard/Outdoor/GuardPolicePage",
     "pages/Test/MyTestPage",
     "pages/Test/PersistentStorageTest",
-    "pages/Test/PersistentStorageTest2"
+    "pages/Test/PersistentStorageTest2",
+    "pages/Test/ImageCompression"
   ]
 }
