@@ -1,11 +1,12 @@
-import { router } from '@kit.ArkUI'
+import { promptAction, router } from '@kit.ArkUI'
 import { calendarManager } from '@kit.CalendarKit'
 import { NavigationTitleBuilder } from '../../common/builders'
-import { themeManager } from '../../manager'
+import { themeManager, userCalendarManager } from '../../manager'
 
 @Entry
 @Component
 struct CalendarIndexPage {
+  @StorageProp("topHeight") topHeight: number = 0
   @State isSafe: boolean = true
   @State overdueEvents: calendarManager.Event[] = []
   @State fraudEvents: calendarManager.Event[] = []
@@ -17,6 +18,10 @@ struct CalendarIndexPage {
 
   onPageHide() {
     themeManager.settingStatusBarBlack()
+  }
+
+  aboutToAppear(): void {
+    userCalendarManager.requestPermission()
   }
 
   @Builder
@@ -112,15 +117,45 @@ struct CalendarIndexPage {
             Column({ space: 10 }) {
               Button('添加普通日程')
                 .onClick(async () => {
-                  // 
+                  //
+                  const id = await userCalendarManager.addEvent({
+                    type: calendarManager.EventType.NORMAL,
+                    title: `${new Date(Date.now()).toLocaleTimeString()}_普通日程`,
+                    startTime: Date.now(),
+                    endTime: Date.now() + 1000 * 60
+                  } as calendarManager.Event)
+                  promptAction.showToast({ message: "添加普通日程成功,id为:" + id })
+
                 })
               Button('添加重要日程')
                 .onClick(async () => {
                   //
+                  const id = await userCalendarManager.addEvent({
+                    type: calendarManager.EventType.IMPORTANT,
+                    title: `${new Date(Date.now()).toLocaleTimeString()}_重要日程`,
+                    reminderTime: [0, 5, 10, 60],
+                    startTime: Date.now(),
+                    endTime: Date.now() + 1000 * 60
+                  } as calendarManager.Event)
+                  promptAction.showToast({ message: "添加重要日程成功,id为:" + id })
+
                 })
               Button('添加过期日程')
                 .onClick(async () => {
                   //
+                  const id = await userCalendarManager.addEvent({
+                    type: calendarManager.EventType.NORMAL,
+                    startTime: Date.now() - 1000 * 60 * 60,
+                    endTime: Date.now() - 1000 * 60
+                  } as calendarManager.Event)
+                  promptAction.showToast({ message: "添加过期日程成功,id为:" + id })
+
+                })
+              Button("查询日历")
+                .onClick(async () => {
+                  const conditions = calendarManager.EventFilter.filterById([1, 2, 3])
+                  const res = await userCalendarManager.queryTheSchedule(conditions)
+                  AlertDialog.show({ message: JSON.stringify(res, null, 2) })
                 })
             }
           }
@@ -150,6 +185,7 @@ struct CalendarIndexPage {
         [[$r('app.color.brand'), 0], [$r('app.color.brand_light'), 0.5], [$r('app.color.white'), 0.5]] :
         [[$r('app.color.brand'), 0], [$r('app.color.brand_light'), 1]]
     })
+    .padding({ top: this.topHeight })
   }
 }
 

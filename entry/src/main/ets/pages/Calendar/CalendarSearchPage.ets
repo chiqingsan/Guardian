@@ -2,12 +2,14 @@ import { calendarManager } from '@kit.CalendarKit';
 import dayjs from 'dayjs';
 import { NavigationTitleBuilder } from '../../common/builders';
 import { TitleDividerComp } from '../../common/components/TitleDividerComp';
-import { themeManager } from '../../manager';
+import { themeManager, userCalendarManager } from '../../manager';
+import { promptAction } from '@kit.ArkUI';
 
 
 @Entry
 @Component
 struct CalendarSearchPage {
+  @StorageProp("topHeight") topHeight: number = 0
   @State list: calendarManager.Event[] = []
   @State searchText: string = ''
   @State activeEvent: calendarManager.Event | null = null
@@ -89,8 +91,10 @@ struct CalendarSearchPage {
             .onChange((value) => {
               this.searchText = value
             })
-            .onSubmit(() => {
+            .onSubmit(async () => {
               // TODO：搜索日程
+              promptAction.showToast({ message: "开始搜索" })
+              this.list = await userCalendarManager.searchForAnEvent(this.searchText)
             })
         }
         .padding({
@@ -181,6 +185,7 @@ struct CalendarSearchPage {
     .titleMode(NavigationTitleMode.Mini)
     .mode(NavigationMode.Stack)
     .hideBackButton(true)
+    .padding({ top: this.topHeight })
     .menus(this.NavigationMenus())
     .linearGradient({
       angle: 180,
