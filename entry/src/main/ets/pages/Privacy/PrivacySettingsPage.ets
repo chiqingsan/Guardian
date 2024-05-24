@@ -10,14 +10,15 @@ interface Item {
   url: string
 }
 
+
 @Entry
 @Component
 struct PrivacySettingsPage {
   @StorageProp("topHeight") topHeight: number = 0
   // 获取隐私空间设置
   @StorageLink(PRIVACY_SETTINGS) privacySettings: PrivacySettings = {}
-  @State isOpenUserAuthLock: boolean = false
-  @State isOpenAntiCracking: boolean = false
+  @State @Watch("idUnlocked") isOpenUserAuthLock: boolean = false
+  @State @Watch("limitOnTheNumberOfTimes") isOpenAntiCracking: boolean = false
   @State list: Item[] = [
     {
       icon: $r('app.media.ic_recorder'),
@@ -38,6 +39,24 @@ struct PrivacySettingsPage {
       url: 'pages/Privacy/Codebook/CodebookIndexPage'
     },
   ]
+
+  aboutToAppear(): void {
+    console.log("PrivacySettingsPage:", JSON.stringify(this.privacySettings))
+    this.isOpenAntiCracking = this.privacySettings.isOpenAntiCracking || false
+    this.isOpenUserAuthLock = this.privacySettings.isOpenUserAuthLock || false
+  }
+
+  // 是否开启防破解
+  limitOnTheNumberOfTimes() {
+    console.log("PrivacySettingsPage:", JSON.stringify(this.isOpenAntiCracking))
+    this.privacySettings.isOpenAntiCracking = this.isOpenAntiCracking
+  }
+
+  // 是否开启指纹或者面容ID解锁
+  idUnlocked() {
+    console.log("PrivacySettingsPage:", JSON.stringify(this.isOpenUserAuthLock))
+    this.privacySettings.isOpenUserAuthLock = this.isOpenUserAuthLock
+  }
 
   build() {
     Navigation() {

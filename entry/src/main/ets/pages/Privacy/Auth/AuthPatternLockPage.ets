@@ -1,4 +1,5 @@
 import { router } from '@kit.ArkUI'
+import dayjs from 'dayjs'
 import { PRIVACY_SETTINGS, PrivacySettings } from '../../../common/constants'
 
 @Entry
@@ -12,13 +13,36 @@ struct AuthPatternLockPage {
   // 错误提示语
   @State errorMessage: string = ''
   // 错误输入次数
-  @State errorInputCount: number = 0
+  @State @Watch("hackProof") errorInputCount: number = 0
   // 是否允许操作
   @State isEnable: boolean = true
   // 定时器，用于清空提示文案
   private timeoutID: number = -1
+  // 用于提示防破解倒计时
+  private timer: number = -1
   // 图形密码控制器
   private patternLockController: PatternLockController = new PatternLockController()
+
+  aboutToAppear(): void {
+    if (this.privacySettings.antiCrackingLastFailedTimeStamp) {
+      if (Date.now() - this.privacySettings.antiCrackingLastFailedTimeStamp < 1000 * 3600) {
+        this.isEnable = false
+        const errorTimestamp = this.privacySettings.antiCrackingLastFailedTimeStamp as number
+
+        // 定时器开始前,先执行一次
+        this.timestampCountdown(errorTimestamp)
+        this.timer = setInterval(() => {
+          this.timestampCountdown(errorTimestamp)
+        }, 1000)
+      }
+    }
+  }
+
+  timestampCountdown(errorTimestamp: number) {
+    const countdown = 1000 * 3600 - Date.now() - errorTimestamp
+    console.log("AuthPatternLockPage_countdown:", JSON.stringify(countdown))
+    this.errorMessage = `请等待${dayjs(countdown).format("mm分:ss秒")}后再试`
+  }
 
   verifyYourPassword(input: number[]) {
     // 保存输入的密码
@@ -45,6 +69,15 @@ struct AuthPatternLockPage {
   clearTheMessage() {
     this.errorMessage = ""
     this.inputPasswords = []
+  }
+
+  hackProof() {
+    if (this.privacySettings.isOpenAntiCracking) {
+      if (this.errorInputCount > 3) {
+        this.privacySettings.antiCrackingLastFailedTimeStamp = Date.now()
+        this.isEnable = false
+      }
+    }
   }
 
   build() {
