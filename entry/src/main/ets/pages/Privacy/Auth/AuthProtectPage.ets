@@ -71,7 +71,7 @@ struct AuthProtect {
       .then((res) => {
         console.log("AuthProtectPage:", JSON.stringify(res))
         // 如果点击了确定
-        if (res.index = 1) {
+        if (res.index === 1) {
           // 持久化存储密码
           this.savePassword()
         }

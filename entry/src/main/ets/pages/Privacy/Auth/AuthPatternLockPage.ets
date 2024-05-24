@@ -2,6 +2,8 @@ import { router } from '@kit.ArkUI'
 import dayjs from 'dayjs'
 import { PRIVACY_SETTINGS, PrivacySettings } from '../../../common/constants'
 import { encryptMD5 } from '../../../manager/encryptMD5'
+import userIAM_userAuth from '@ohos.userIAM.userAuth';
+import { BusinessError } from '@kit.BasicServicesKit'
 
 @Entry
 @Component
@@ -25,24 +27,73 @@ struct AuthPatternLockPage {
   private patternLockController: PatternLockController = new PatternLockController()
 
   aboutToAppear(): void {
-    if (this.privacySettings.antiCrackingLastFailedTimeStamp) {
-      if (Date.now() - this.privacySettings.antiCrackingLastFailedTimeStamp < 1000 * 3600) {
-        this.isEnable = false
-        const errorTimestamp = this.privacySettings.antiCrackingLastFailedTimeStamp as number
 
-        // 定时器开始前,先执行一次
-        this.timestampCountdown(errorTimestamp)
-        this.timer = setInterval(() => {
+    if (this.privacySettings.isOpenUserAuthLock) {
+      this.userAuthentication()
+    } else {
+      if (this.privacySettings.antiCrackingLastFailedTimeStamp) {
+        if (Date.now() - this.privacySettings.antiCrackingLastFailedTimeStamp < 1000 * 3600) {
+          this.isEnable = false
+          const errorTimestamp = this.privacySettings.antiCrackingLastFailedTimeStamp as number
+
+          // 定时器开始前,先执行一次
           this.timestampCountdown(errorTimestamp)
-        }, 1000)
+          this.timer = setInterval(() => {
+            this.timestampCountdown(errorTimestamp)
+          }, 1000)
+        }
       }
     }
   }
 
+  // 用户认证
+  userAuthentication() {
+
+    // 设置认证参数
+    const authParam: userIAM_userAuth.AuthParam = {
+      challenge: new Uint8Array([49, 49, 49, 49, 49, 49]),
+      authType: [userIAM_userAuth.UserAuthType.PIN, userIAM_userAuth.UserAuthType.FACE,
+        userIAM_userAuth.UserAuthType.FINGERPRINT],
+      authTrustLevel: userIAM_userAuth.AuthTrustLevel.ATL3,
+    };
+
+    // 配置认证界面
+    const widgetParam: userIAM_userAuth.WidgetParam = {
+      title: '请进行身份认证',
+    };
+
+    try {
+      // 获取认证对象
+      let userAuthInstance = userIAM_userAuth.getUserAuthInstance(authParam, widgetParam);
+      console.log('获取到认证对象,开始准备拉起认证窗口');
+
+      userAuthInstance.start();
+      console.log('认证结束');
+      // 订阅认证结果
+      userAuthInstance.on('result', {
+        onResult(result) {
+          console.log('userAuthInstance callback result = ' + JSON.stringify(result));
+          // 可在认证结束或其他业务需要场景，取消订阅认证结果
+
+          // 如果认证正确,这进入隐私空间
+          if (result.result === 12500000) {
+            router.pushUrl({ url: "/pages/Privacy/PrivacyIndexPage".slice(1) })
+          }
+
+          userAuthInstance.off('result');
+        }
+      });
+    } catch (error) {
+      const err = error as BusinessError;
+      console.log(`auth catch error. Code is ${err?.code}, message is ${err?.message}`);
+    }
+  }
+
+  // 倒计时
   timestampCountdown(errorTimestamp: number) {
     const countdown = 1000 * 3600 - Date.now() - errorTimestamp
     console.log("AuthPatternLockPage_countdown:", JSON.stringify(countdown))
-    this.errorMessage = `请等待${dayjs(countdown).format("mm分:ss秒")}后再试`
+    this.errorMessage = `请等待${dayjs(countdown).format(" mm分:ss秒 ")}后再试`
   }
 
   verifyYourPassword(input: number[]) {
@@ -77,6 +128,13 @@ struct AuthPatternLockPage {
       if (this.errorInputCount > 3) {
         this.privacySettings.antiCrackingLastFailedTimeStamp = Date.now()
         this.isEnable = false
+        const errorTimestamp = this.privacySettings.antiCrackingLastFailedTimeStamp as number
+
+        // 定时器开始前,先执行一次
+        this.timestampCountdown(errorTimestamp)
+        this.timer = setInterval(() => {
+          this.timestampCountdown(errorTimestamp)
+        }, 1000)
       }
     }
   }

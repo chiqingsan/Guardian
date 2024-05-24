@@ -1,5 +1,5 @@
 import { AbilityConstant, UIAbility, Want } from '@kit.AbilityKit';
-import { window } from '@kit.ArkUI';
+import { router, window } from '@kit.ArkUI';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { deviceInfo } from '@kit.BasicServicesKit';
 import { PrivacySettings, PRIVACY_SETTINGS } from '../common/constants';
@@ -45,6 +45,13 @@ export default class EntryAbility extends UIAbility {
   }
 
   onBackground(): void {
+    // console.log("EntryAbility:", JSON.stringify(router.getState()))
+    // 如果处于隐私页面,则返回首页
+    if (router.getState().path.includes("Privacy")) {
+      router.back({
+        url: "pages/Index"
+      })
+    }
     // Ability has back to background
     hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onBackground');
   }

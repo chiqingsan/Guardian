@@ -94,6 +94,10 @@
         "reason": "$string:permission_reason_contact",
         "usedScene": {}
       },
+      // 用户认证
+      {
+        "name": "ohos.permission.ACCESS_BIOMETRIC"
+      }
     ]
   }
 }
