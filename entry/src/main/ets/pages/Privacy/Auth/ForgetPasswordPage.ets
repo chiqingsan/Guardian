@@ -1,8 +1,10 @@
 import { PRIVACY_QUESTION_LIST, PRIVACY_SETTINGS, PrivacySettings } from '../../../common/constants'
+import { promptAction, router } from '@kit.ArkUI'
 
 @Entry
 @Component
 struct ForgetPasswordPage {
+  @StorageProp("topHeight") topHeight: number = 0
   // 获取 AppStorage 的数据
   @StorageLink(PRIVACY_SETTINGS) privacySettings: PrivacySettings = {}
   // 输入的答案
@@ -12,6 +14,27 @@ struct ForgetPasswordPage {
   // 空状态，输入框抖动效果
   @State inputPaddingLeft: number = 10
 
+  aboutToAppear(): void {
+    // this.verifyTheSecurity()
+  }
+
+  verifyTheSecurity() {
+    console.log("ForgetPasswordPage:", JSON.stringify(this.privacySettings))
+    if (this.answerText === this.privacySettings.protectQuestionAnswer) {
+      router.pushUrl({ url: "/pages/Privacy/Auth/AuthPatternLockSettingsPage".slice(1) })
+      this.privacySettings = {}
+    } else {
+      this.answerText ? this.setErrorMessage("密保问题错误!") : this.setErrorMessage("输入不能为空!")
+    }
+  }
+
+  // 提示错误
+  setErrorMessage(message: string) {
+    this.answerText = ""
+    this.inputPaddingLeft = 16
+    this.errorMessage = `${message}`
+  }
+
   @Builder
   NavigationMenus() {
     Row() {
@@ -20,6 +43,8 @@ struct ForgetPasswordPage {
         .fontColor($r('app.color.font'))
         .onClick(() => {
           // TODO：下一步
+          this.verifyTheSecurity()
+
         })
     }
     .height('100%')
@@ -65,6 +90,7 @@ struct ForgetPasswordPage {
               })
               .onSubmit(() => {
                 // TODO：提交密保问题答案
+                this.verifyTheSecurity()
               })
           }
           .border({ width: { bottom: 1 }, color: $r('app.color.border'), radius: 0 })
@@ -90,5 +116,6 @@ struct ForgetPasswordPage {
     .titleMode(NavigationTitleMode.Mini)
     .mode(NavigationMode.Stack)
     .menus(this.NavigationMenus)
+    .padding({ top: this.topHeight })
   }
 }

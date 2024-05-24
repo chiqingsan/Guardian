@@ -13,6 +13,7 @@ interface NoteItem {
 @Entry
 @Component
 struct NoteIndexPage {
+  @StorageProp("topHeight") topHeight:number = 0
   // 笔记列表
   @State list: NoteItem[] = []
 
@@ -120,5 +121,6 @@ struct NoteIndexPage {
     .title('笔记')
     .titleMode(NavigationTitleMode.Mini)
     .mode(NavigationMode.Stack)
+    .padding({top:this.topHeight})
   }
 }

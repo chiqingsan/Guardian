@@ -22,6 +22,7 @@ interface tabItem {
 @Entry
 @Component
 struct PhotoAddPage {
+  @StorageProp("topHeight") topHeight:number = 0
   @State currentIndex: number = 0
   @State selectUris: string[] = []
   @State tabList: tabItem[] = [{ id: 0, title: '默认相册' }, { id: 1, title: '其他相册' },]
@@ -302,6 +303,6 @@ struct PhotoAddPage {
         colors: [[$r('app.color.brand'), 0], [$r('app.color.brand_light'), 1]]
       })
       .visibility(this.isEncrypting ? Visibility.Visible : Visibility.None)
-    }
+    }.padding({top:this.topHeight})
   }
 }

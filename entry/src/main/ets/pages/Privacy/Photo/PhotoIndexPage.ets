@@ -22,6 +22,7 @@ interface GroupItem {
 @Entry
 @Component
 struct PhotoIndexPage {
+  @StorageProp("topHeight") topHeight:number = 0
   @State isEditing: boolean = false
   @State list: PhotoItem[] = []
   @State groupList: GroupItem[] = []
@@ -205,5 +206,6 @@ struct PhotoIndexPage {
     .titleMode(NavigationTitleMode.Mini)
     .mode(NavigationMode.Stack)
     .menus(this.NavigationMenus)
+    .padding({top:this.topHeight})
   }
 }

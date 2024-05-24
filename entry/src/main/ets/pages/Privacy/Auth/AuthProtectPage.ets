@@ -58,7 +58,7 @@ struct AuthProtect {
 
   async confirmAnswer() {
     // 弹窗二次确认
-    const dialogRes = await promptAction.showDialog({
+    promptAction.showDialog({
       alignment: DialogAlignment.Center, // 预览器默认居中，模拟器默认靠底部，统一设置居中
       title: '提示',
       message: `你设定的密码保护问题如下\n问题：${PRIVACY_QUESTION_LIST[this.activeIndex].value}\n答案：${this.answerText}\n请确保能够牢记！`,
@@ -67,11 +67,15 @@ struct AuthProtect {
         { text: '确定', color: $r('app.color.brand') },
       ]
     })
-    // 如果点击了确定
-    if (dialogRes.index = 1) {
-      // 持久化存储密码
-      this.savePassword()
-    }
+      .then((res) => {
+        console.log("AuthProtectPage:", JSON.stringify(res))
+        // 如果点击了确定
+        if (res.index = 1) {
+          // 持久化存储密码
+          this.savePassword()
+        }
+      })
+
   }
 
   // 持久化存储密码

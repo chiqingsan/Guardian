@@ -16,6 +16,7 @@ interface RouterParams {
 @Entry
 @Component
 struct PhotoPreviewPage {
+  @StorageProp("topHeight") topHeight: number = 0
   @State list: PhotoItem[] = []
   @State activePhotoUri: string = ''
   @State activeIndex: number = 0
@@ -104,5 +105,6 @@ struct PhotoPreviewPage {
     .titleMode(NavigationTitleMode.Mini)
     .mode(NavigationMode.Stack)
     .backgroundColor('#000')
+    .padding({ top: this.topHeight })
   }
 }

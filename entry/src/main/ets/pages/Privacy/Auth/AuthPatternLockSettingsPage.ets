@@ -30,8 +30,8 @@ struct AuthPatternLockSettingsPage {
   }
 
   clearErrorMessage() {
-    this.errorMessage = ''
     this.patternLockController.setChallengeResult(PatternLockChallengeResult.CORRECT)
+    this.errorMessage = ''
   }
 
   // 重置图形密码和临时密码
@@ -114,6 +114,7 @@ struct AuthPatternLockSettingsPage {
           .onDotConnect(() => {
             // 密码输入选中宫格圆点时触发该回调
             clearInterval(this.timeoutID)
+            this.clearErrorMessage()
           })
           .onPatternComplete((input: number[]) => {
             // TODO：密码输入结束时触发该回调

@@ -6,6 +6,7 @@ interface RouterParams {
 @Entry
 @Component
 struct NoteDetailPage {
+  @StorageProp("topHeight") topHeight: number = 0
   // 标题
   @State title: string = ''
   // 内容
@@ -91,6 +92,7 @@ struct NoteDetailPage {
     .titleMode(NavigationTitleMode.Mini)
     .mode(NavigationMode.Stack)
     .menus(this.NavigationMenus())
+    .padding({ top: this.topHeight })
 
   }
 }

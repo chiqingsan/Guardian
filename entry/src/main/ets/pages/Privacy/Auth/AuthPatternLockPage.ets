@@ -23,7 +23,7 @@ struct AuthPatternLockPage {
   verifyYourPassword(input: number[]) {
     // 保存输入的密码
     this.inputPasswords = input
-    if (this.inputPasswords.toString() == this.privacySettings.patternPassword?.toString()) {
+    if (this.inputPasswords.toString() == this.privacySettings.patternPassword) {
       this.patternLockController.setChallengeResult(PatternLockChallengeResult.CORRECT)
       router.pushUrl({ url: "/pages/Privacy/PrivacyIndexPage".slice(1) })
     } else {
