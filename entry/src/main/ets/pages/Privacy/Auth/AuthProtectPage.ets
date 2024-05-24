@@ -84,6 +84,8 @@ struct AuthProtect {
     // 2. 保存密保问题 + 答案
     this.privacySettings.protectQuestionIndex = this.activeIndex // 下标不能加密，因为 MD5 为单向加密
     this.privacySettings.protectQuestionAnswer = this.answerText // 问题答案需要加密
+    console.log("AuthProtectPage:", JSON.stringify(this.privacySettings))
+
     // 3. 跳转页面
     if (this.routerParams.patternPassword) {
       // 有路由参数，表示首次设置密保，跳转到隐私空间首页

@@ -119,7 +119,6 @@ struct AuthPatternLockSettingsPage {
             // TODO：密码输入结束时触发该回调
             // AlertDialog.show({ message: JSON.stringify(input, null, 2) })
             this.onPatternComplete(input)
-            this.resetPattern()
 
           })
       }

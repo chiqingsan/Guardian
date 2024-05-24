@@ -124,7 +124,7 @@ PersistentStorage.persistProp('isHidePrivacy', false)
 
 @Component
 struct HomeShortcut {
-  @StorageLink('isHidePrivacy') isHidePrivacy: boolean = false
+  @StorageLink('isHidePrivacy') @Watch("toggleTheDisplay") isHidePrivacy: boolean = false
   // 监听 AppStorage 的数据变化，注意 @Watch 的书写位置
   @StorageLink(PRIVACY_SETTINGS) privacySettings: PrivacySettings = {}
   @State list: IconItem[] = [
@@ -172,7 +172,7 @@ struct HomeShortcut {
       this.list[2] = {
         title: '日历清理',
         icon: $r('app.media.ic_home_shortcut_rlql'),
-        url: '/'
+        url: '/pages/Calendar/CalendarIndexPage'
       }
     } else {
       this.list[2] = {
@@ -198,6 +198,7 @@ struct HomeShortcut {
 
   // 打开隐私空间
   openPrivacyPage() {
+    console.log("HomeTabsComp:", JSON.stringify(this.privacySettings))
     if (!this.privacySettings.patternPassword) {
       // 如果还没设置过图形密码，跳转到设置页
       router.pushUrl({ url: 'pages/Privacy/Auth/AuthPatternLockSettingsPage' })
@@ -240,22 +241,9 @@ struct HomeShortcut {
             // 长按
             LongPressGesture({ duration: 1000 })
               .onAction(() => {
-                // 更新持久化的值
-                this.isHidePrivacy = !this.isHidePrivacy
-                AppStorage.set("isHidePrivacy", this.isHidePrivacy)
-                // 隐藏隐私空间入口
-                if (item.title === '隐私空间') {
-                  this.list[index] = {
-                    title: '日历清理',
-                    icon: $r('app.media.ic_home_shortcut_rlql'),
-                    url: '/'
-                  }
-                } else if (item.title === '日历清理') {
-                  this.list[index] = {
-                    title: '隐私空间',
-                    icon: $r('app.media.ic_home_shortcut_yskj'),
-                    url: '/pages/Privacy/PrivacyIndexPage'
-                  }
+                if (index === 2) {
+                  // 更新持久化的值
+                  this.isHidePrivacy = !this.isHidePrivacy
                 }
               })
           )

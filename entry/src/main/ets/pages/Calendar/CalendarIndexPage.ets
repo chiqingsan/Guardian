@@ -132,7 +132,7 @@ struct CalendarIndexPage {
                   //
                   const id = await userCalendarManager.addEvent({
                     type: calendarManager.EventType.IMPORTANT,
-                    title: `${new Date(Date.now()).toLocaleTimeString()}_重要日程`,
+                    title: `${new Date(Date.now()).toLocaleString()}_重要日程`,
                     reminderTime: [0, 5, 10, 60],
                     startTime: Date.now(),
                     endTime: Date.now() + 1000 * 60
@@ -145,7 +145,8 @@ struct CalendarIndexPage {
                   //
                   const id = await userCalendarManager.addEvent({
                     type: calendarManager.EventType.NORMAL,
-                    startTime: Date.now() - 1000 * 60 * 60,
+                    title:"添加一个过期的日历",
+                    startTime: Date.now() - (31536000000 * Math.random() * 5),
                     endTime: Date.now() - 1000 * 60
                   } as calendarManager.Event)
                   promptAction.showToast({ message: "添加过期日程成功,id为:" + id })

@@ -4,6 +4,7 @@ import { PRIVACY_SETTINGS, PrivacySettings } from '../../../common/constants'
 @Entry
 @Component
 struct AuthPatternLockPage {
+  @StorageProp("topHeight") topHeight: number = 0
   // 获取 AppStorage 的数据
   @StorageLink(PRIVACY_SETTINGS) privacySettings: PrivacySettings = {}
   // 输入的密码
@@ -18,6 +19,19 @@ struct AuthPatternLockPage {
   private timeoutID: number = -1
   // 图形密码控制器
   private patternLockController: PatternLockController = new PatternLockController()
+
+  verifyYourPassword(input: number[]) {
+    this.inputPasswords = input
+    if (this.inputPasswords.toString() == this.privacySettings.patternPassword?.toString()) {
+      this.patternLockController.setChallengeResult(PatternLockChallengeResult.CORRECT)
+      router.pushUrl({ url: "/pages/Privacy/PrivacyIndexPage".slice(1) })
+    } else {
+      this.patternLockController.setChallengeResult(PatternLockChallengeResult.WRONG)
+      setTimeout(() => {
+        this.patternLockController.reset()
+      }, 1000)
+    }
+  }
 
   build() {
     Column() {
@@ -60,6 +74,7 @@ struct AuthPatternLockPage {
             })
             .onPatternComplete((input: number[]) => {
               // TODO：密码输入结束时触发该回调
+              this.verifyYourPassword(input)
             })
 
           Row({ space: 20 }) {
@@ -81,5 +96,6 @@ struct AuthPatternLockPage {
       .hideTitleBar(false)
     }
     .height('100%')
+    .padding({ top: this.topHeight })
   }
 }
