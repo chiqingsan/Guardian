@@ -21,16 +21,30 @@ struct AuthPatternLockPage {
   private patternLockController: PatternLockController = new PatternLockController()
 
   verifyYourPassword(input: number[]) {
+    // 保存输入的密码
     this.inputPasswords = input
     if (this.inputPasswords.toString() == this.privacySettings.patternPassword?.toString()) {
       this.patternLockController.setChallengeResult(PatternLockChallengeResult.CORRECT)
       router.pushUrl({ url: "/pages/Privacy/PrivacyIndexPage".slice(1) })
     } else {
-      this.patternLockController.setChallengeResult(PatternLockChallengeResult.WRONG)
-      setTimeout(() => {
-        this.patternLockController.reset()
-      }, 1000)
+      this.setErrorMessage('手势密码错误，请重新输入')
     }
+  }
+
+  // 提示错误
+  setErrorMessage(message: string) {
+    this.errorInputCount++
+    this.errorMessage = `${message} 已错误${this.errorInputCount}次`
+    this.patternLockController.setChallengeResult(PatternLockChallengeResult.WRONG)
+    this.timeoutID = setTimeout(() => {
+      this.patternLockController.reset()
+      this.clearTheMessage()
+    }, 1000)
+  }
+
+  clearTheMessage() {
+    this.errorMessage = ""
+    this.inputPasswords = []
   }
 
   build() {
@@ -71,6 +85,7 @@ struct AuthPatternLockPage {
             .onDotConnect(() => {
               // 密码输入选中宫格圆点时触发该回调
               clearInterval(this.timeoutID)
+              this.clearTheMessage()
             })
             .onPatternComplete((input: number[]) => {
               // TODO：密码输入结束时触发该回调

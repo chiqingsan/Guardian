@@ -42,7 +42,7 @@ struct AuthPatternLockSettingsPage {
       this.patternLockController.reset()
       // 重置临时密码
       this.inputPassword = []
-    }, 1200)
+    }, 1000)
   }
 
   // 手势密码输入完成

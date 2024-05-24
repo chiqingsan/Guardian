@@ -13,6 +13,7 @@ interface Item {
 @Entry
 @Component
 struct PrivacySettingsPage {
+  @StorageProp("topHeight") topHeight: number = 0
   // 获取隐私空间设置
   @StorageLink(PRIVACY_SETTINGS) privacySettings: PrivacySettings = {}
   @State isOpenUserAuthLock: boolean = false
@@ -106,5 +107,6 @@ struct PrivacySettingsPage {
     .title('隐私空间设置')
     .titleMode(NavigationTitleMode.Mini)
     .mode(NavigationMode.Stack)
+    .padding({ top: this.topHeight })
   }
 }
