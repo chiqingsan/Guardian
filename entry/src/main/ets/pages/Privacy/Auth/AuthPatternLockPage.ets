@@ -1,6 +1,7 @@
 import { router } from '@kit.ArkUI'
 import dayjs from 'dayjs'
 import { PRIVACY_SETTINGS, PrivacySettings } from '../../../common/constants'
+import { encryptMD5 } from '../../../manager/encryptMD5'
 
 @Entry
 @Component
@@ -47,7 +48,7 @@ struct AuthPatternLockPage {
   verifyYourPassword(input: number[]) {
     // 保存输入的密码
     this.inputPasswords = input
-    if (this.inputPasswords.toString() == this.privacySettings.patternPassword) {
+    if (encryptMD5(this.inputPasswords.toString()) == this.privacySettings.patternPassword) {
       this.patternLockController.setChallengeResult(PatternLockChallengeResult.CORRECT)
       router.pushUrl({ url: "/pages/Privacy/PrivacyIndexPage".slice(1) })
     } else {

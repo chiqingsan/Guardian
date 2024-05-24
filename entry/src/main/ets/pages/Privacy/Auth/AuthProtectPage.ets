@@ -1,6 +1,7 @@
 // DONE: 未输入内容时，点击下一步，输入框的 placeholder 文案抖动
 import { PRIVACY_QUESTION_LIST, PRIVACY_SETTINGS, PrivacySettings } from '../../../common/constants';
 import { promptAction, router } from '@kit.ArkUI';
+import { encryptMD5 } from '../../../manager/encryptMD5';
 
 // 初始化持久化存储
 PersistentStorage.persistProp<PrivacySettings>(PRIVACY_SETTINGS, {})
@@ -83,11 +84,11 @@ struct AuthProtect {
     // 1. 保存图形密码
     if (this.routerParams.patternPassword) {
       // 密码保存前，需要通过 MD5 加密存储
-      this.privacySettings.patternPassword = this.routerParams.patternPassword.toString()
+      this.privacySettings.patternPassword = encryptMD5(this.routerParams.patternPassword.toString())
     }
     // 2. 保存密保问题 + 答案
     this.privacySettings.protectQuestionIndex = this.activeIndex // 下标不能加密，因为 MD5 为单向加密
-    this.privacySettings.protectQuestionAnswer = this.answerText // 问题答案需要加密
+    this.privacySettings.protectQuestionAnswer = encryptMD5(this.answerText) // 问题答案需要加密
     console.log("AuthProtectPage:", JSON.stringify(this.privacySettings))
 
     // 3. 跳转页面

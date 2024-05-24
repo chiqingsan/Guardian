@@ -1,5 +1,6 @@
 import { PRIVACY_QUESTION_LIST, PRIVACY_SETTINGS, PrivacySettings } from '../../../common/constants'
 import { promptAction, router } from '@kit.ArkUI'
+import { encryptMD5 } from '../../../manager/encryptMD5'
 
 @Entry
 @Component
@@ -20,7 +21,7 @@ struct ForgetPasswordPage {
 
   verifyTheSecurity() {
     console.log("ForgetPasswordPage:", JSON.stringify(this.privacySettings))
-    if (this.answerText === this.privacySettings.protectQuestionAnswer) {
+    if (encryptMD5(this.answerText) === this.privacySettings.protectQuestionAnswer) {
       router.pushUrl({ url: "/pages/Privacy/Auth/AuthPatternLockSettingsPage".slice(1) })
       this.privacySettings = {}
     } else {
