@@ -4,6 +4,8 @@ import { PRIVACY_SETTINGS, PrivacySettings } from '../../../common/constants'
 import { encryptMD5 } from '../../../manager/encryptMD5'
 import userIAM_userAuth from '@ohos.userIAM.userAuth';
 import { BusinessError } from '@kit.BasicServicesKit'
+import userAuth from '@ohos.userIAM.userAuth'
+import { userAuthManager } from '../../../manager'
 
 @Entry
 @Component
@@ -27,70 +29,38 @@ struct AuthPatternLockPage {
   private patternLockController: PatternLockController = new PatternLockController()
 
   aboutToAppear(): void {
+    // 判断是否需要拉起用户认证
+    this.privacySettings.isOpenUserAuthLock && this.userAuthentication()
+    // 判断之前是否错误锁定
+    if (this.privacySettings.antiCrackingLastFailedTimeStamp) {
+      if (Date.now() - this.privacySettings.antiCrackingLastFailedTimeStamp < 1000 * 3600) {
+        this.isEnable = false
+        const errorTimestamp = this.privacySettings.antiCrackingLastFailedTimeStamp as number
 
-    if (this.privacySettings.isOpenUserAuthLock) {
-      this.userAuthentication()
-    } else {
-      if (this.privacySettings.antiCrackingLastFailedTimeStamp) {
-        if (Date.now() - this.privacySettings.antiCrackingLastFailedTimeStamp < 1000 * 3600) {
-          this.isEnable = false
-          const errorTimestamp = this.privacySettings.antiCrackingLastFailedTimeStamp as number
-
-          // 定时器开始前,先执行一次
+        clearInterval(this.timer)
+        // 定时器开始前,先执行一次
+        this.timestampCountdown(errorTimestamp)
+        this.timer = setInterval(() => {
           this.timestampCountdown(errorTimestamp)
-          this.timer = setInterval(() => {
-            this.timestampCountdown(errorTimestamp)
-          }, 1000)
-        }
+        }, 1000)
       }
     }
+
   }
 
   // 用户认证
-  userAuthentication() {
-
-    // 设置认证参数
-    const dynamicArrays: number[] = new Array(6).fill(Math.floor(Math.random() * 255))
-    // console.log("AuthPatternLockPage_dynamicArrays:", JSON.stringify(dynamicArrays))
-    const authParam: userIAM_userAuth.AuthParam = {
-      // challenge: new Uint8Array([49, 49, 49, 49, 49, 49]),
-      challenge: new Uint8Array(dynamicArrays),
-      authType: [userIAM_userAuth.UserAuthType.PIN, userIAM_userAuth.UserAuthType.FACE,
-        userIAM_userAuth.UserAuthType.FINGERPRINT],
-      authTrustLevel: userIAM_userAuth.AuthTrustLevel.ATL3,
-    };
-
-    // 配置认证界面
-    const widgetParam: userIAM_userAuth.WidgetParam = {
-      title: '请进行身份认证',
-    };
-
+  async userAuthentication() {
+    // 拉起用户认证
     try {
-      // 获取认证对象
-      const userAuthInstance = userIAM_userAuth.getUserAuthInstance(authParam, widgetParam);
-      console.log('获取到认证对象,开始准备拉起认证窗口');
-
-      userAuthInstance.start();
-      console.log('认证结束');
-      // 订阅认证结果
-      userAuthInstance.on('result', {
-        onResult(result) {
-          console.log('userAuthInstance callback result = ' + JSON.stringify(result));
-          // 可在认证结束或其他业务需要场景，取消订阅认证结果
-
-          // 如果认证正确,这进入隐私空间
-          if (result.result === 12500000) {
-            router.pushUrl({ url: "/pages/Privacy/PrivacyIndexPage".slice(1) })
-          }
-          if (result.result === 12500003) {
-            promptAction.showToast({ message: "取消用户验证" })
-          }
-          userAuthInstance.off('result');
-        }
-      });
-    } catch (error) {
-      const err = error as BusinessError;
-      console.log(`auth catch error. Code is ${err?.code}, message is ${err?.message}`);
+      const res = await userAuthManager.startUserAuth()
+      if (res.results) {
+        router.replaceUrl({ url: "/pages/Privacy/PrivacyIndexPage".slice(1) })
+      } else {
+        promptAction.showToast({ message: `${res.message}` })
+      }
+    } catch (e) {
+      // 打印错误
+      console.error("AuthPatternLockPage_e:", JSON.stringify(e))
     }
   }
 
@@ -135,6 +105,7 @@ struct AuthPatternLockPage {
         this.isEnable = false
         const errorTimestamp = this.privacySettings.antiCrackingLastFailedTimeStamp as number
 
+        clearInterval(this.timer)
         // 定时器开始前,先执行一次
         this.timestampCountdown(errorTimestamp)
         this.timer = setInterval(() => {
@@ -148,10 +119,6 @@ struct AuthPatternLockPage {
     Column() {
       // 标题
       Navigation() {
-        // Column() {
-        //   Text('patternPassword：' + this.privacySettings.patternPassword)
-        //   Text('passwords：' + encryptMD5(this.inputPasswords.toString()))
-        // }
 
         Column({ space: 20 }) {
           Column({ space: 10 }) {

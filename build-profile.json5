@@ -6,9 +6,9 @@
         "type": "HarmonyOS",
         "material": {
           "certpath": "C:\\Users\\chiqingsan\\.ohos\\config\\default_hm_guardian_XCwn72kfVdAL4Ogz_kG85pH3NmEBvOHNPHOd9IGgErI=.cer",
-          "storePassword": "0000001BBF2455DE874726AC5B855A3A01D3FB1BB90EA8F33F4A35FDAFECDEDCCE2FBB0E4F7B290ADFDAF7",
+          "storePassword": "0000001BFBF2DBB81AB7C697DBA12511BCDFAEB1A8DE7A63265FC1C62FEE89580F95108CC154CDCBDFD5D1",
           "keyAlias": "debugKey",
-          "keyPassword": "0000001BCC53C1708C739F0AEAA9D5047AE90231971C196A32522D3D8426A9D3FFA2EE84A9DED7C665CD24",
+          "keyPassword": "0000001B86ACC0807893DEE9377B0D43245B33AEC1D990D9C7C2E2E4F178120D9AFDCAA77E1BE4EC8E1CF7",
           "profile": "C:\\Users\\chiqingsan\\.ohos\\config\\default_hm_guardian_XCwn72kfVdAL4Ogz_kG85pH3NmEBvOHNPHOd9IGgErI=.p7b",
           "signAlg": "SHA256withECDSA",
           "storeFile": "C:\\Users\\chiqingsan\\.ohos\\config\\default_hm_guardian_XCwn72kfVdAL4Ogz_kG85pH3NmEBvOHNPHOd9IGgErI=.p12"

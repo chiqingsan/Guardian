@@ -3,6 +3,7 @@ import { CellRowArrowComp, CellRowSwitchComp, DividerComp, TitleDividerComp } fr
 import { PRIVACY_SETTINGS, PrivacySettings } from '../../common/constants'
 import { showDevelopingTips } from '../../common/dev'
 import { userAuth } from '@kit.UserAuthenticationKit'
+import { userAuthManager } from '../../manager'
 
 interface Item {
   icon: ResourceStr
@@ -43,8 +44,8 @@ struct PrivacySettingsPage {
 
   aboutToAppear(): void {
     console.log("PrivacySettingsPage:", JSON.stringify(this.privacySettings))
-    this.isOpenAntiCracking = this.privacySettings.isOpenAntiCracking || false
-    this.isOpenUserAuthLock = this.privacySettings.isOpenUserAuthLock || false
+    this.isOpenAntiCracking = this.privacySettings.isOpenAntiCracking ?? false
+    this.isOpenUserAuthLock = this.privacySettings.isOpenUserAuthLock ?? false
   }
 
   // 是否开启防破解
@@ -55,18 +56,9 @@ struct PrivacySettingsPage {
 
   // 是否开启指纹或者面容ID解锁
   idUnlocked() {
-    try {
-      userAuth.getAvailableStatus(userAuth.UserAuthType.PIN, userAuth.AuthTrustLevel.ATL3)
-      console.log("PrivacySettingsPage:", JSON.stringify(this.isOpenUserAuthLock))
-      this.privacySettings.isOpenUserAuthLock = this.isOpenUserAuthLock
-    } catch (e) {
-      if (e.code === 12500010) {
-        console.error("PrivacySettingsPage:", JSON.stringify(e), "请先设置设备验证!")
-        promptAction.showToast({ message: "请先设置设备验证!" })
-      } else {
-        console.error("PrivacySettingsPage:", JSON.stringify(e), "该设备不支持开启设备验证!")
-        promptAction.showToast({ message: "该设备不支持开启设备验证!" })
-      }
+    const res = userAuthManager.checkUserAuthSupport()
+    if (!res) {
+      promptAction.showToast({ message: "设备未设置用户认证, 或不支持" })
       this.privacySettings.isOpenUserAuthLock = false
       this.isOpenUserAuthLock = false
     }

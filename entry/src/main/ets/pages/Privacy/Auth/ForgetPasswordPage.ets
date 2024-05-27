@@ -1,6 +1,7 @@
 import { PRIVACY_QUESTION_LIST, PRIVACY_SETTINGS, PrivacySettings } from '../../../common/constants'
 import { promptAction, router } from '@kit.ArkUI'
 import { encryptMD5 } from '../../../manager/encryptMD5'
+import { themeManager } from '../../../manager'
 
 @Entry
 @Component
@@ -19,10 +20,18 @@ struct ForgetPasswordPage {
     // this.verifyTheSecurity()
   }
 
+  onPageShow(): void {
+    themeManager.disableFullScreen()
+  }
+
+  aboutToDisappear(): void {
+    themeManager.enableFullScreen()
+  }
+
   verifyTheSecurity() {
     console.log("ForgetPasswordPage:", JSON.stringify(this.privacySettings))
     if (encryptMD5(this.answerText) === this.privacySettings.protectQuestionAnswer) {
-      router.pushUrl({ url: "/pages/Privacy/Auth/AuthPatternLockSettingsPage".slice(1) })
+      router.replaceUrl({ url: "/pages/Privacy/Auth/AuthPatternLockSettingsPage".slice(1) })
       this.privacySettings = {}
     } else {
       this.answerText ? this.setErrorMessage("密保问题错误!") : this.setErrorMessage("输入不能为空!")
@@ -90,7 +99,7 @@ struct ForgetPasswordPage {
                 this.answerText = text
               })
               .onSubmit(() => {
-                // TODO：提交密保问题答案
+                // 提交密保问题答案
                 this.verifyTheSecurity()
               })
           }
