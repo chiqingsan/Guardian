@@ -21,6 +21,8 @@ struct AuthPatternLockPage {
   @State @Watch("hackProof") errorInputCount: number = 0
   // 是否允许操作
   @State isEnable: boolean = true
+  // 是否开启模糊
+  @State isFuzzy: boolean = false
   // 定时器，用于清空提示文案
   private timeoutID: number = -1
   // 用于提示防破解倒计时
@@ -54,6 +56,7 @@ struct AuthPatternLockPage {
 
   // 用户认证
   async userAuthentication() {
+    this.isFuzzy = true
     // 拉起用户认证
     try {
       const res = await userAuthManager.startUserAuth()
@@ -66,6 +69,9 @@ struct AuthPatternLockPage {
       // 打印错误
       console.error("AuthPatternLockPage_e:", JSON.stringify(e))
     }
+    animateTo({ duration: 500, curve: Curve.Ease }, () => {
+      this.isFuzzy = false
+    })
   }
 
   // 倒计时
@@ -179,6 +185,7 @@ struct AuthPatternLockPage {
       .hideTitleBar(false)
     }
     .height('100%')
+    .blur(this.isFuzzy ? 18 : 0)
     .padding({ top: this.topHeight })
   }
 }
