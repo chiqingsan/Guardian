@@ -52,16 +52,22 @@ struct PrivacySettingsPage {
   limitOnTheNumberOfTimes() {
     console.log("PrivacySettingsPage:", JSON.stringify(this.isOpenAntiCracking))
     this.privacySettings.isOpenAntiCracking = this.isOpenAntiCracking
+    if (!this.privacySettings.isOpenAntiCracking) {
+      this.privacySettings.antiCrackingLastFailedTimeStamp = undefined
+    }
   }
 
   // 是否开启指纹或者面容ID解锁
   idUnlocked() {
+    this.privacySettings.isOpenUserAuthLock = this.isOpenUserAuthLock
+
     const res = userAuthManager.checkUserAuthSupport()
     if (!res) {
       promptAction.showToast({ message: "设备未设置用户认证, 或不支持" })
       this.privacySettings.isOpenUserAuthLock = false
       this.isOpenUserAuthLock = false
     }
+
   }
 
   build() {

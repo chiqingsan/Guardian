@@ -32,7 +32,7 @@ struct AuthPatternLockPage {
     // 判断是否需要拉起用户认证
     this.privacySettings.isOpenUserAuthLock && this.userAuthentication()
     // 判断之前是否错误锁定
-    if (this.privacySettings.antiCrackingLastFailedTimeStamp) {
+    if (this.privacySettings.antiCrackingLastFailedTimeStamp && this.privacySettings.isOpenAntiCracking) {
       if (Date.now() - this.privacySettings.antiCrackingLastFailedTimeStamp < 1000 * 3600) {
         this.isEnable = false
         const errorTimestamp = this.privacySettings.antiCrackingLastFailedTimeStamp as number
@@ -46,6 +46,10 @@ struct AuthPatternLockPage {
       }
     }
 
+  }
+
+  aboutToDisappear(): void {
+    clearInterval(this.timer)
   }
 
   // 用户认证
