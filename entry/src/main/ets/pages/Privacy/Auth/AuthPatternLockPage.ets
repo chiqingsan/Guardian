@@ -1,4 +1,4 @@
-import { router } from '@kit.ArkUI'
+import { promptAction, router } from '@kit.ArkUI'
 import dayjs from 'dayjs'
 import { PRIVACY_SETTINGS, PrivacySettings } from '../../../common/constants'
 import { encryptMD5 } from '../../../manager/encryptMD5'
@@ -50,8 +50,11 @@ struct AuthPatternLockPage {
   userAuthentication() {
 
     // 设置认证参数
+    const dynamicArrays: number[] = new Array(6).fill(Math.floor(Math.random() * 255))
+    // console.log("AuthPatternLockPage_dynamicArrays:", JSON.stringify(dynamicArrays))
     const authParam: userIAM_userAuth.AuthParam = {
-      challenge: new Uint8Array([49, 49, 49, 49, 49, 49]),
+      // challenge: new Uint8Array([49, 49, 49, 49, 49, 49]),
+      challenge: new Uint8Array(dynamicArrays),
       authType: [userIAM_userAuth.UserAuthType.PIN, userIAM_userAuth.UserAuthType.FACE,
         userIAM_userAuth.UserAuthType.FINGERPRINT],
       authTrustLevel: userIAM_userAuth.AuthTrustLevel.ATL3,
@@ -64,7 +67,7 @@ struct AuthPatternLockPage {
 
     try {
       // 获取认证对象
-      let userAuthInstance = userIAM_userAuth.getUserAuthInstance(authParam, widgetParam);
+      const userAuthInstance = userIAM_userAuth.getUserAuthInstance(authParam, widgetParam);
       console.log('获取到认证对象,开始准备拉起认证窗口');
 
       userAuthInstance.start();
@@ -79,7 +82,9 @@ struct AuthPatternLockPage {
           if (result.result === 12500000) {
             router.pushUrl({ url: "/pages/Privacy/PrivacyIndexPage".slice(1) })
           }
-
+          if (result.result === 12500003) {
+            promptAction.showToast({ message: "取消用户验证" })
+          }
           userAuthInstance.off('result');
         }
       });
@@ -91,9 +96,9 @@ struct AuthPatternLockPage {
 
   // 倒计时
   timestampCountdown(errorTimestamp: number) {
-    const countdown = 1000 * 3600 - Date.now() - errorTimestamp
+    const countdown = 1000 * 3600 - (Date.now() - errorTimestamp)
     console.log("AuthPatternLockPage_countdown:", JSON.stringify(countdown))
-    this.errorMessage = `请等待${dayjs(countdown).format(" mm分:ss秒 ")}后再试`
+    this.errorMessage = `请等待${dayjs(countdown).format(" mm分 : ss秒 ")}后再试`
   }
 
   verifyYourPassword(input: number[]) {
@@ -101,7 +106,7 @@ struct AuthPatternLockPage {
     this.inputPasswords = input
     if (encryptMD5(this.inputPasswords.toString()) == this.privacySettings.patternPassword) {
       this.patternLockController.setChallengeResult(PatternLockChallengeResult.CORRECT)
-      router.pushUrl({ url: "/pages/Privacy/PrivacyIndexPage".slice(1) })
+      router.replaceUrl({ url: "/pages/Privacy/PrivacyIndexPage".slice(1) })
     } else {
       this.setErrorMessage('手势密码错误，请重新输入')
     }
@@ -114,7 +119,7 @@ struct AuthPatternLockPage {
     this.patternLockController.setChallengeResult(PatternLockChallengeResult.WRONG)
     this.timeoutID = setTimeout(() => {
       this.patternLockController.reset()
-      this.clearTheMessage()
+      this.errorInputCount >= 3 || this.clearTheMessage()
     }, 1000)
   }
 
@@ -125,7 +130,7 @@ struct AuthPatternLockPage {
 
   hackProof() {
     if (this.privacySettings.isOpenAntiCracking) {
-      if (this.errorInputCount > 3) {
+      if (this.errorInputCount >= 3) {
         this.privacySettings.antiCrackingLastFailedTimeStamp = Date.now()
         this.isEnable = false
         const errorTimestamp = this.privacySettings.antiCrackingLastFailedTimeStamp as number

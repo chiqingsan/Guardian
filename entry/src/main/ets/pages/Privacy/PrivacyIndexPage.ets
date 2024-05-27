@@ -36,12 +36,6 @@ struct PrivacyIndexPage {
     .padding({ left: 25 })
   }
 
-  // 修复侧滑返回问题
-  onBackPress() {
-    router.back({ url: 'pages/Index' })
-    return true
-  }
-
   // 导航右侧自定义菜单
   @Builder
   NavigationMenus() {

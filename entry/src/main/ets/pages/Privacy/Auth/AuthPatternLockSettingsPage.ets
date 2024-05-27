@@ -64,7 +64,7 @@ struct AuthPatternLockSettingsPage {
         // 2.2 非首次输入，需判断两次输入的密码是否相同
         if (JSON.stringify(this.firstPassword) === JSON.stringify(this.inputPassword)) {
           // 跳转到密保设置页，并传递当前输入的密码
-          router.pushUrl({
+          router.replaceUrl({
             url: 'pages/Privacy/Auth/AuthProtectPage', // 跳转密保设置页
             params: { patternPassword: this.firstPassword }  // 传递密码
           })

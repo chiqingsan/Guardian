@@ -1,7 +1,8 @@
-import { router } from '@kit.ArkUI'
+import { promptAction, router } from '@kit.ArkUI'
 import { CellRowArrowComp, CellRowSwitchComp, DividerComp, TitleDividerComp } from '../../common/components'
 import { PRIVACY_SETTINGS, PrivacySettings } from '../../common/constants'
 import { showDevelopingTips } from '../../common/dev'
+import { userAuth } from '@kit.UserAuthenticationKit'
 
 interface Item {
   icon: ResourceStr
@@ -54,8 +55,21 @@ struct PrivacySettingsPage {
 
   // 是否开启指纹或者面容ID解锁
   idUnlocked() {
-    console.log("PrivacySettingsPage:", JSON.stringify(this.isOpenUserAuthLock))
-    this.privacySettings.isOpenUserAuthLock = this.isOpenUserAuthLock
+    try {
+      userAuth.getAvailableStatus(userAuth.UserAuthType.PIN, userAuth.AuthTrustLevel.ATL3)
+      console.log("PrivacySettingsPage:", JSON.stringify(this.isOpenUserAuthLock))
+      this.privacySettings.isOpenUserAuthLock = this.isOpenUserAuthLock
+    } catch (e) {
+      if (e.code === 12500010) {
+        console.error("PrivacySettingsPage:", JSON.stringify(e), "请先设置设备验证!")
+        promptAction.showToast({ message: "请先设置设备验证!" })
+      } else {
+        console.error("PrivacySettingsPage:", JSON.stringify(e), "该设备不支持开启设备验证!")
+        promptAction.showToast({ message: "该设备不支持开启设备验证!" })
+      }
+      this.privacySettings.isOpenUserAuthLock = false
+      this.isOpenUserAuthLock = false
+    }
   }
 
   build() {

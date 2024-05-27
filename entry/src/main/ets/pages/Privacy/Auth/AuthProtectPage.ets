@@ -94,7 +94,7 @@ struct AuthProtect {
     // 3. 跳转页面
     if (this.routerParams.patternPassword) {
       // 有路由参数，表示首次设置密保，跳转到隐私空间首页
-      router.pushUrl({ url: 'pages/Privacy/PrivacyIndexPage' })
+      router.replaceUrl({ url: 'pages/Privacy/PrivacyIndexPage' })
     } else {
       // 没有路由参数，表示修改密保问题，返回上一页即可
       router.back()
