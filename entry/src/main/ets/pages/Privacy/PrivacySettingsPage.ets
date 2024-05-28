@@ -4,6 +4,7 @@ import { PRIVACY_SETTINGS, PrivacySettings } from '../../common/constants'
 import { showDevelopingTips } from '../../common/dev'
 import { userAuth } from '@kit.UserAuthenticationKit'
 import { userAuthManager } from '../../manager'
+import { privacyNoteDB } from '../../database'
 
 interface Item {
   icon: ResourceStr
@@ -42,10 +43,29 @@ struct PrivacySettingsPage {
     },
   ]
 
-  aboutToAppear(): void {
+  // 获取笔记的数量
+  async getTheNumberOfNotes() {
+    try {
+      const count = await privacyNoteDB.queryCount()
+      AlertDialog.show({ message: JSON.stringify(count, null, 2) })
+      this.list[1] = {
+        icon: $r('app.media.ic_notebook'),
+        name: '笔记',
+        count: count,
+        url: 'pages/Privacy/Note/NoteIndexPage'
+      }
+    } catch (e) {
+      AlertDialog.show({ message: "出错了:" + JSON.stringify(e, null, 2) })
+    }
+  }
+
+  onPageShow(): void {
+
     console.log("PrivacySettingsPage:", JSON.stringify(this.privacySettings))
     this.isOpenAntiCracking = this.privacySettings.isOpenAntiCracking ?? false
     this.isOpenUserAuthLock = this.privacySettings.isOpenUserAuthLock ?? false
+    // 更新笔记数量
+    this.getTheNumberOfNotes()
   }
 
   // 是否开启防破解

@@ -1,4 +1,7 @@
 // 页面参数
+import { privacyNoteDB, PrivacyNoteDBInfo } from '../../../database'
+import { promptAction, router } from '@kit.ArkUI'
+
 interface RouterParams {
   id?: number
 }
@@ -13,6 +16,109 @@ struct NoteDetailPage {
   @State content: string = ''
   // 页面参数
   @State routerParams: RouterParams = {}
+  backup: PrivacyNoteDBInfo = {} as PrivacyNoteDBInfo
+
+  aboutToAppear(): void {
+    this.getTheRouteParameters()
+  }
+
+  onBackPress(): boolean | void {
+
+    if (this.routerParams.id) {
+      if (this.title !== this.backup.title || this.content !== this.backup.content) {
+
+        promptAction.showDialog({
+          alignment: DialogAlignment.Center,
+          title: "提示",
+          message: "当前编辑的内容还没有保存, 确定要返回吗?",
+          buttons: [
+            { text: "确定", color: "#ff0000" },
+            { text: "取消", color: "#3366dd" }
+          ]
+        }).then((res) => {
+          if (res.index === 0) {
+            router.back()
+          }
+        })
+
+        return true
+      }
+      return false
+    }
+
+    if (this.title.trim() && this.content.trim()) {
+
+      promptAction.showDialog({
+        alignment: DialogAlignment.Center,
+        title: "提示",
+        message: "当前有正在编辑内容, 确定要返回吗?",
+        buttons: [
+          { text: "确定", color: "#ff0000" },
+          { text: "取消", color: "#3366dd" }
+        ]
+      }).then((res) => {
+        if (res.index === 0) {
+          router.back()
+        }
+      })
+
+      return true
+    }
+
+  }
+
+  // 获取路由参数
+  getTheRouteParameters() {
+    if (router.getParams()) {
+      this.routerParams = router.getParams() as RouterParams
+      // 根据id查询笔记内容
+      this.queryNotes()
+    }
+  }
+
+  // 查询笔记内容
+  async queryNotes() {
+    const res = await privacyNoteDB.queryTheList<PrivacyNoteDBInfo>(this.routerParams.id)
+    this.title = res[0].title
+    this.content = res[0].title
+    this.backup = res[0]
+    this.backup = res[0]
+  }
+
+  // 保存笔记
+  async saveYourNotes() {
+    if (this.routerParams.id) {
+
+      await privacyNoteDB.update({
+        id: this.routerParams.id,
+        title: this.title,
+        content: this.content,
+        date_added: Date.now()
+      })
+
+      promptAction.showToast({ message: "更新成功" })
+
+
+    } else {
+      await privacyNoteDB.insert({
+        id: null,
+        title: this.title,
+        content: this.content,
+        date_added: Date.now()
+      })
+
+      promptAction.showToast({ message: "保存成功" })
+
+    }
+
+    // 保存成功后返回
+    router.back()
+  }
+
+  // 删除数据
+  deletionOfData(id: number) {
+    privacyNoteDB.deleteData(id)
+  }
 
   @Builder
   NavigationMenus() {
@@ -23,6 +129,7 @@ struct NoteDetailPage {
         .enabled(this.title.trim() !== '')
         .onClick(() => {
           // TODO：保存/新增
+          this.saveYourNotes()
         })
     }
     .height('100%')
@@ -72,6 +179,12 @@ struct NoteDetailPage {
               .layoutWeight(1)
               .onClick(() => {
                 // TODO：删除
+                if (this.routerParams.id !== undefined) {
+                  this.deletionOfData(this.routerParams.id)
+                  router.back()
+                } else {
+                  promptAction.showToast({ message: "还不能删除, 因为没有保存噢~" })
+                }
               })
             Button('分享')
               .type(ButtonType.Normal)

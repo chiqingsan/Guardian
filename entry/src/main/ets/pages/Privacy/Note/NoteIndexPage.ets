@@ -1,6 +1,7 @@
 import { router } from '@kit.ArkUI'
 import dayjs from 'dayjs'
 import { EmptyTipsComp } from '../../../common/components'
+import { privacyNoteDB } from '../../../database'
 
 // 隐私笔记
 interface NoteItem {
@@ -13,9 +14,23 @@ interface NoteItem {
 @Entry
 @Component
 struct NoteIndexPage {
-  @StorageProp("topHeight") topHeight:number = 0
+  @StorageProp("topHeight") topHeight: number = 0
   // 笔记列表
   @State list: NoteItem[] = []
+
+  onPageShow(): void {
+    this.getAListOfNotes()
+  }
+
+  async getAListOfNotes() {
+    this.list = await privacyNoteDB.queryTheList<NoteItem>()
+  }
+
+  // 删除数据
+  deletionOfData(id: number) {
+    this.list.splice(this.list.findIndex(v => v.id === id), 1)
+    privacyNoteDB.deleteData(id)
+  }
 
   @Builder
   swipeActionEnd(id: number) {
@@ -27,6 +42,7 @@ struct NoteIndexPage {
         .backgroundColor('#FF5E5D')
         .onClick(() => {
           // TODO：删除
+          this.deletionOfData(id)
         })
     }
     .height('100%')
@@ -73,10 +89,14 @@ struct NoteIndexPage {
                 .transition({ type: TransitionType.Delete, opacity: 0 })
                 .swipeAction({
                   end: {
-                    builder: () => { this.swipeActionEnd(item.id) },
+                    builder: () => {
+                      this.swipeActionEnd(item.id)
+                    },
                     onAction: () => {
                       animateTo({ duration: 1000 }, () => {
                         // TODO：侧滑删除
+                        this.deletionOfData(item.id)
+
                       })
                     },
                     actionAreaDistance: 56,
@@ -121,6 +141,6 @@ struct NoteIndexPage {
     .title('笔记')
     .titleMode(NavigationTitleMode.Mini)
     .mode(NavigationMode.Stack)
-    .padding({top:this.topHeight})
+    .padding({ top: this.topHeight })
   }
 }
