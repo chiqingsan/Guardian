@@ -25,7 +25,7 @@ struct NoteDetailPage {
   onBackPress(): boolean | void {
 
     if (this.routerParams.id) {
-      if (this.title !== this.backup.title || this.content !== this.backup.content) {
+      if (this.title.trim() !== this.backup.title || this.content.trim() !== this.backup.content) {
 
         promptAction.showDialog({
           alignment: DialogAlignment.Center,
@@ -80,8 +80,7 @@ struct NoteDetailPage {
   async queryNotes() {
     const res = await privacyNoteDB.queryTheList<PrivacyNoteDBInfo>(this.routerParams.id)
     this.title = res[0].title
-    this.content = res[0].title
-    this.backup = res[0]
+    this.content = res[0].content
     this.backup = res[0]
   }
 
@@ -116,8 +115,13 @@ struct NoteDetailPage {
   }
 
   // 删除数据
-  deletionOfData(id: number) {
-    privacyNoteDB.deleteData(id)
+  deletionOfData() {
+    if (this.routerParams.id !== undefined) {
+      privacyNoteDB.deleteData(this.routerParams.id)
+      router.back()
+    } else {
+      promptAction.showToast({ message: "还不能删除, 因为没有保存噢~" })
+    }
   }
 
   @Builder
@@ -179,12 +183,7 @@ struct NoteDetailPage {
               .layoutWeight(1)
               .onClick(() => {
                 // TODO：删除
-                if (this.routerParams.id !== undefined) {
-                  this.deletionOfData(this.routerParams.id)
-                  router.back()
-                } else {
-                  promptAction.showToast({ message: "还不能删除, 因为没有保存噢~" })
-                }
+                this.deletionOfData()
               })
             Button('分享')
               .type(ButtonType.Normal)

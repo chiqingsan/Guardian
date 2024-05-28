@@ -42,7 +42,9 @@ struct NoteIndexPage {
         .backgroundColor('#FF5E5D')
         .onClick(() => {
           // TODO：删除
-          this.deletionOfData(id)
+          animateTo({ duration: 1000, curve: Curve.Ease }, () => {
+            this.deletionOfData(id)
+          })
         })
     }
     .height('100%')
@@ -103,6 +105,8 @@ struct NoteIndexPage {
                   },
                   edgeEffect: SwipeEdgeEffect.None
                 })
+              }, (item: NoteItem) => {
+                return item.id?.toString()
               })
               // 底部占位
               ListItem()

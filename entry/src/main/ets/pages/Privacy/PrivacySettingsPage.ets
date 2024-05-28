@@ -45,18 +45,15 @@ struct PrivacySettingsPage {
 
   // 获取笔记的数量
   async getTheNumberOfNotes() {
-    try {
-      const count = await privacyNoteDB.queryCount()
-      AlertDialog.show({ message: JSON.stringify(count, null, 2) })
-      this.list[1] = {
-        icon: $r('app.media.ic_notebook'),
-        name: '笔记',
-        count: count,
-        url: 'pages/Privacy/Note/NoteIndexPage'
-      }
-    } catch (e) {
-      AlertDialog.show({ message: "出错了:" + JSON.stringify(e, null, 2) })
+
+    const count = await privacyNoteDB.queryCount()
+    this.list[1] = {
+      icon: $r('app.media.ic_notebook'),
+      name: '笔记',
+      count: count,
+      url: 'pages/Privacy/Note/NoteIndexPage'
     }
+
   }
 
   onPageShow(): void {
