@@ -1,6 +1,9 @@
 // 页面参数
 import { privacyNoteDB, PrivacyNoteDBInfo } from '../../../database'
 import { promptAction, router } from '@kit.ArkUI'
+import { systemShare } from '@kit.ShareKit'
+import { uniformTypeDescriptor } from '@kit.ArkData'
+import { common, UIAbility } from '@kit.AbilityKit'
 
 interface RouterParams {
   id?: number
@@ -25,7 +28,7 @@ struct NoteDetailPage {
   onBackPress(): boolean | void {
 
     if (this.routerParams.id) {
-      if (this.title.trim() !== this.backup.title || this.content.trim() !== this.backup.content) {
+      if (this.title !== this.backup.title || this.content !== this.backup.content) {
 
         promptAction.showDialog({
           alignment: DialogAlignment.Center,
@@ -88,8 +91,7 @@ struct NoteDetailPage {
   async saveYourNotes() {
     if (this.routerParams.id) {
 
-      await privacyNoteDB.update({
-        id: this.routerParams.id,
+      await privacyNoteDB.update(this.routerParams.id, {
         title: this.title,
         content: this.content,
         date_added: Date.now()
@@ -99,7 +101,7 @@ struct NoteDetailPage {
 
 
     } else {
-      await privacyNoteDB.insert({
+      await privacyNoteDB.insert<PrivacyNoteDBInfo>({
         id: null,
         title: this.title,
         content: this.content,
@@ -119,8 +121,24 @@ struct NoteDetailPage {
     if (this.routerParams.id !== undefined) {
       privacyNoteDB.deleteData(this.routerParams.id)
       router.back()
-    } else {
-      promptAction.showToast({ message: "还不能删除, 因为没有保存噢~" })
+    }
+  }
+
+  // 分享笔记
+  shareNotes() {
+    try {
+      const data = new systemShare.SharedData({
+        utd: uniformTypeDescriptor.UniformDataType.PLAIN_TEXT,
+        title: this.title,
+        content: this.content
+      })
+
+      const res = new systemShare.ShareController(data)
+
+      const context = getContext() as common.UIAbilityContext
+      res.show(context, {})
+    } catch (e) {
+      AlertDialog.show({ message: JSON.stringify(e, null, 2) })
     }
   }
 
@@ -157,6 +175,7 @@ struct NoteDetailPage {
             })
             .onSubmit(() => {
               // TODO：提交表单(保存/新增)
+              this.saveYourNotes()
             })
           Text('内容')
             .fontSize(14)
@@ -192,6 +211,7 @@ struct NoteDetailPage {
               .layoutWeight(1)
               .onClick(() => {
                 // TODO：分享
+                this.shareNotes()
               })
           }
           .padding({ bottom: 80 })

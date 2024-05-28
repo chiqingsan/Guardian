@@ -8,6 +8,7 @@ export interface PrivacyNoteDBInfo extends ValuesBucket {
   date_added: number
 }
 
+
 class PrivacyNoteDB {
   // 操作数据库的实例
   private store: relationalStore.RdbStore | null = null
@@ -39,7 +40,7 @@ class PrivacyNoteDB {
   }
 
   // 添加一条数据
-  async insert(value: PrivacyNoteDBInfo) {
+  async insert<T extends ValuesBucket>(value: T) {
     const store = await this.getStoreInstance()
     return store.insert(this.tableName, value)
   }
@@ -68,13 +69,10 @@ class PrivacyNoteDB {
   }
 
   // 更新数据
-  async update(val: Partial<PrivacyNoteDBInfo>) {
-    if (val.id === undefined) {
-      return Promise.reject("id error")
-    }
+  async update(id: number, val: ValuesBucket) {
     const store = await this.getStoreInstance()
     const predicates = new relationalStore.RdbPredicates(this.tableName)
-    predicates.equalTo("id", val.id)
+    predicates.equalTo("id", id)
     return store.update(val, predicates)
   }
 
@@ -84,7 +82,6 @@ class PrivacyNoteDB {
     if (id === undefined) {
       return
     }
-
     const store = await this.getStoreInstance()
     const predicates = new relationalStore.RdbPredicates(this.tableName)
     predicates.equalTo("id", id)
