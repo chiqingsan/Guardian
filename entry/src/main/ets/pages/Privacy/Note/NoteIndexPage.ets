@@ -23,13 +23,13 @@ struct NoteIndexPage {
   }
 
   async getAListOfNotes() {
-    this.list = await privacyNoteDB.queryTheList<NoteItem>()
+    this.list = await privacyNoteDB.getTheList<NoteItem>()
   }
 
   // 删除数据
   deletionOfData(id: number) {
     this.list.splice(this.list.findIndex(v => v.id === id), 1)
-    privacyNoteDB.deleteData(id)
+    privacyNoteDB.delData(id)
   }
 
   @Builder

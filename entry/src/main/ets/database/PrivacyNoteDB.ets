@@ -8,83 +8,100 @@ export interface PrivacyNoteDBInfo extends ValuesBucket {
   date_added: number
 }
 
-
-class PrivacyNoteDB {
-  // 操作数据库的实例
-  private store: relationalStore.RdbStore | null = null
-  private tableName = 'privacy_note'
-  // 创建数据库的语句
-  private sqlCreate = `CREATE TABLE IF NOT EXISTS ${this.tableName} (
+// 数据库名和表名
+const privacyNotes = 'privacy_note'
+// 创建数据库的语句
+const sqlCreate = `CREATE TABLE IF NOT EXISTS ${privacyNotes} (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT NOT NULL,
         content TEXT NOT NULL,
         date_added INTEGER NOT NULL
       )`
 
-  async getStoreInstance() {
-    // 如果数据库实例已存在，直接返回，没有才创建实例
-    if (this.store) {
-      return this.store
+
+// RdbModule类用于封装对关系型数据库的操作
+class RdbModule {
+  // 操作数据库的实例
+  private store: relationalStore.RdbStore | null = null;
+  private tableName: string; // 数据库表的名称
+  private sqlCreate: string; // 创建数据库表的SQL语句
+  private securityLevel: relationalStore.SecurityLevel; // 数据库的安全等级
+
+  // 构造函数，初始化表名、创建语句和安全等级
+  constructor(tableName: string, sqlCreate: string, securityLevel: relationalStore.SecurityLevel) {
+    if (sqlCreate.includes(tableName)) {
+      this.tableName = tableName;
+      this.sqlCreate = sqlCreate;
+      this.securityLevel = securityLevel;
+    } else {
+      // 如果表名和建表语句内的表名不匹配,则抛出错误
+      console.error("The table name does not match the statement that created the table")
+      throw new Error("The table name does not match the statement that created the table");
     }
-    // 获取操作数据库的实例
+  }
+
+  // 获取数据库操作实例，如果已存在则直接返回，否则创建新的实例
+  async getStoreInstance() {
+    if (this.store) {
+      return this.store;
+    }
     const store = await relationalStore.getRdbStore(getContext(), {
       name: this.tableName + '.db', // 数据库名称
-      securityLevel: relationalStore.SecurityLevel.S1 // 安全等级
-    })
-    // 执行创建语句
-    store.executeSql(this.sqlCreate)
-    // 存储起来方便下次直接获取
-    this.store = store
-    // 返回 store 实例
-    return this.store
+      securityLevel: this.securityLevel // 安全等级
+    });
+    store.executeSql(this.sqlCreate); // 执行创建表的SQL语句
+    this.store = store; // 存储实例以便后续使用
+    return this.store; // 返回数据库操作实例
   }
 
-  // 添加一条数据
-  async insert<T extends ValuesBucket>(value: T) {
-    const store = await this.getStoreInstance()
-    return store.insert(this.tableName, value)
+  // 插入一条数据到数据库
+  async setData<T extends ValuesBucket>(value: T) {
+    const store = await this.getStoreInstance();
+    return store.insert(this.tableName, value);
   }
 
-  // 查询表的数据量
-  async queryCount() {
-    console.log("PrivacyNoteDB_store:", JSON.stringify(this.store))
-    const store = await this.getStoreInstance()
-    const predicates = new relationalStore.RdbPredicates(this.tableName)
-    const res = await store.query(predicates)
-    return res!.rowCount <= 0 ? 0 : res?.rowCount
+  // 查询数据库中的数据量
+  async getTotal() {
+    const store = await this.getStoreInstance();
+    const predicates = new relationalStore.RdbPredicates(this.tableName);
+    const results = await store.query(predicates);
+    return results.rowCount <= 0 ? 0 : results.rowCount;
   }
 
-  async queryTheList<T>(id?: number) {
-    const store = await this.getStoreInstance()
-    const predicates = new relationalStore.RdbPredicates(this.tableName)
-    id !== undefined ? predicates.equalTo("id", id) : predicates.orderByDesc("id")
-    const res = await store.query(predicates)
-
-    const list: T[] = []
-    while (res?.goToNextRow()) {
-      list.push(res.getRow() as T)
-      // console.log("PrivacyNoteDB_res:", JSON.stringify(res.getRow()))
+  // 查询数据库列表，可以指定单个或多个ID，返回一个数组
+  async getTheList<T>(id?: number | number[]) {
+    const store = await this.getStoreInstance();
+    const predicates = new relationalStore.RdbPredicates(this.tableName);
+    if (typeof id === 'number') {
+      id = [id];
     }
-    return list
+    id !== undefined ? predicates.in("id", id) : predicates.orderByDesc("id");
+    const results = await store.query(predicates);
+
+    const list: T[] = [];
+    while (results.goToNextRow()) {
+      list.push(results.getRow() as T);
+    }
+    return list;
   }
 
-  // 更新数据
-  async update<T extends ValuesBucket>(id: number, val: T) {
-    
-    const store = await this.getStoreInstance()
-    const predicates = new relationalStore.RdbPredicates(this.tableName)
-    predicates.equalTo("id", id)
-    return store.update(val, predicates)
+  // 更新数据库中的数据
+  async upData<T extends ValuesBucket>(id: number, val: T) {
+    const store = await this.getStoreInstance();
+    const predicates = new relationalStore.RdbPredicates(this.tableName);
+    predicates.equalTo("id", id);
+    return store.update(val, predicates);
   }
 
-  // 删除数据
-  async deleteData(id: number) {
-
-    const store = await this.getStoreInstance()
-    const predicates = new relationalStore.RdbPredicates(this.tableName)
-    predicates.equalTo("id", id)
-    return store.delete(predicates)
+  // 删除数据库中的数据
+  async delData(id: number) {
+    const store = await this.getStoreInstance();
+    const predicates = new relationalStore.RdbPredicates(this.tableName);
+    predicates.equalTo("id", id);
+    return store.delete(predicates);
   }
 }
 
-export const privacyNoteDB = new PrivacyNoteDB()
+// 创建RdbModule实例，并传入表名、创建语句和安全等级
+// 如果需要多个数据库，可以导出多个实例
+export const privacyNoteDB = new RdbModule(privacyNotes, sqlCreate, relationalStore.SecurityLevel.S1);

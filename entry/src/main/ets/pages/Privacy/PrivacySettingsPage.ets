@@ -46,7 +46,7 @@ struct PrivacySettingsPage {
   // 获取笔记的数量
   async getTheNumberOfNotes() {
 
-    const count = await privacyNoteDB.queryCount()
+    const count = await privacyNoteDB.getTotal()
     this.list[1] = {
       icon: $r('app.media.ic_notebook'),
       name: '笔记',

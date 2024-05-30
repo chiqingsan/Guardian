@@ -3,6 +3,8 @@ import dayjs from 'dayjs'
 import duration from 'dayjs/plugin/duration'
 import { EmptyTipsComp } from '../../../common/components'
 import { CustomInputDialog } from '../../../common/dialog'
+import { fileIo } from '@kit.CoreFileKit'
+import { PRIVACY_RECORDER_FOLDER } from '../../../common/constants'
 
 // 用于把毫秒格式化成 mm:ss 的相对时间插件
 dayjs.extend(duration)
@@ -43,6 +45,47 @@ struct RecorderIndexPage {
   })
   private playingTimerId: number = -1
   private recordingTimerId: number = -1
+
+  aboutToAppear(): void {
+    // 初始化录音的存放文件夹
+    this.initFolder()
+  }
+
+  // 创建文件夹
+  initFolder() {
+    const context = getContext()
+    const filesDir = context.filesDir
+
+    const list = fileIo.listFileSync(filesDir)
+
+    if (!list.includes(PRIVACY_RECORDER_FOLDER)) {
+      fileIo.mkdirSync(`${filesDir}/${PRIVACY_RECORDER_FOLDER}`)
+    }
+  }
+
+  // 开始录音
+  startRecording() {
+    this.isRecording = true
+  }
+
+  // 结束录音
+  endTheRecording() {
+    this.isRecording = false
+  }
+
+  // 开启计时
+  startTheTimer() {
+    clearInterval(this.recordingTimerId)
+    this.recordingTime = 0
+    this.recordingTimerId = setInterval(() => {
+      this.recordingTime++
+    }, 1000)
+  }
+
+  // 结束计时
+  endTheTimer() {
+    clearInterval(this.recordingTimerId)
+  }
 
   @Builder
   NavigationMenus() {
@@ -184,6 +227,8 @@ struct RecorderIndexPage {
             .aspectRatio(1)
             .onClick(() => {
               // TODO：开始录音
+              this.startRecording()
+              this.startTheTimer()
             })
         }
         .width('100%')
@@ -228,7 +273,7 @@ struct RecorderIndexPage {
           .margin({ top: 40 })
 
           Text(
-            dayjs(this.recordingTime)
+            dayjs(this.recordingTime * 1000)
               .format(this.recordingTime > 1000 * 60 * 60 ? 'HH:mm:ss' : 'mm:ss')
           )
             .fontSize(18)
@@ -245,6 +290,8 @@ struct RecorderIndexPage {
               .borderRadius(10)
               .onClick(() => {
                 // TODO：停止录音
+                this.endTheRecording()
+                this.endTheTimer()
               })
           }
           .padding({ left: 15, right: 15 })

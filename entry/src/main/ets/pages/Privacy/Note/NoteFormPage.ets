@@ -81,7 +81,7 @@ struct NoteDetailPage {
 
   // 查询笔记内容
   async queryNotes() {
-    const res = await privacyNoteDB.queryTheList<PrivacyNoteDBInfo>(this.routerParams.id)
+    const res = await privacyNoteDB.getTheList<PrivacyNoteDBInfo>(this.routerParams.id)
     this.title = res[0].title
     this.content = res[0].content
     this.backup = res[0]
@@ -91,7 +91,7 @@ struct NoteDetailPage {
   async saveYourNotes() {
     if (this.routerParams.id) {
 
-      await privacyNoteDB.update(this.routerParams.id, {
+      await privacyNoteDB.upData(this.routerParams.id, {
         title: this.title,
         content: this.content,
         date_added: Date.now()
@@ -101,7 +101,7 @@ struct NoteDetailPage {
 
 
     } else {
-      await privacyNoteDB.insert<PrivacyNoteDBInfo>({
+      await privacyNoteDB.setData<PrivacyNoteDBInfo>({
         id: null,
         title: this.title,
         content: this.content,
@@ -119,7 +119,7 @@ struct NoteDetailPage {
   // 删除数据
   deletionOfData() {
     if (this.routerParams.id !== undefined) {
-      privacyNoteDB.deleteData(this.routerParams.id)
+      privacyNoteDB.delData(this.routerParams.id)
       router.back()
     }
   }
@@ -152,7 +152,7 @@ struct NoteDetailPage {
         .onClick(() => {
           // TODO：保存/新增
           this.saveYourNotes()
-          
+
         })
     }
     .height('100%')
