@@ -47,6 +47,7 @@
     "pages/Test/PersistentStorageTest2",
     "pages/Test/ImageCompression",
     "pages/Test/UserTextInput",
-    "pages/Test/LodashTest"
+    "pages/Test/LodashTest",
+    "pages/Test/AudioTestPage"
   ]
 }

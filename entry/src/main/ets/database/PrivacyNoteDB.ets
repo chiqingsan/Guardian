@@ -69,7 +69,8 @@ class PrivacyNoteDB {
   }
 
   // 更新数据
-  async update(id: number, val: ValuesBucket) {
+  async update<T extends ValuesBucket>(id: number, val: T) {
+    
     const store = await this.getStoreInstance()
     const predicates = new relationalStore.RdbPredicates(this.tableName)
     predicates.equalTo("id", id)
@@ -79,9 +80,6 @@ class PrivacyNoteDB {
   // 删除数据
   async deleteData(id: number) {
 
-    if (id === undefined) {
-      return
-    }
     const store = await this.getStoreInstance()
     const predicates = new relationalStore.RdbPredicates(this.tableName)
     predicates.equalTo("id", id)

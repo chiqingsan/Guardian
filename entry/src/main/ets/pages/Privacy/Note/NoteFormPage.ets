@@ -2,7 +2,7 @@
 import { privacyNoteDB, PrivacyNoteDBInfo } from '../../../database'
 import { promptAction, router } from '@kit.ArkUI'
 import { systemShare } from '@kit.ShareKit'
-import { uniformTypeDescriptor } from '@kit.ArkData'
+import { uniformTypeDescriptor, ValuesBucket } from '@kit.ArkData'
 import { common, UIAbility } from '@kit.AbilityKit'
 
 interface RouterParams {
@@ -95,7 +95,7 @@ struct NoteDetailPage {
         title: this.title,
         content: this.content,
         date_added: Date.now()
-      })
+      } as PrivacyNoteDBInfo)
 
       promptAction.showToast({ message: "更新成功" })
 
@@ -152,6 +152,7 @@ struct NoteDetailPage {
         .onClick(() => {
           // TODO：保存/新增
           this.saveYourNotes()
+          
         })
     }
     .height('100%')
