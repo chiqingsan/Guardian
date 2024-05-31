@@ -4,7 +4,7 @@ import { PRIVACY_SETTINGS, PrivacySettings } from '../../common/constants'
 import { showDevelopingTips } from '../../common/dev'
 import { userAuth } from '@kit.UserAuthenticationKit'
 import { userAuthManager } from '../../manager'
-import { privacyNoteDB } from '../../database'
+import { privacyNoteDB, privacyRecordingsDB } from '../../database'
 
 interface Item {
   icon: ResourceStr
@@ -56,6 +56,18 @@ struct PrivacySettingsPage {
 
   }
 
+  // 获取录音的数量
+  async getTheNumberOfRecordings() {
+
+    const count = await privacyRecordingsDB.getTotal()
+    this.list[0] = {
+      icon: $r('app.media.ic_recorder'),
+      name: '录音',
+      count: count,
+      url: 'pages/Privacy/Recorder/RecorderIndexPage'
+    }
+  }
+
   onPageShow(): void {
 
     console.log("PrivacySettingsPage:", JSON.stringify(this.privacySettings))
@@ -63,6 +75,7 @@ struct PrivacySettingsPage {
     this.isOpenUserAuthLock = this.privacySettings.isOpenUserAuthLock ?? false
     // 更新笔记数量
     this.getTheNumberOfNotes()
+    this.getTheNumberOfRecordings()
   }
 
   // 是否开启防破解

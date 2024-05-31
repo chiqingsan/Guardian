@@ -5,12 +5,15 @@ import { EmptyTipsComp } from '../../../common/components'
 import { CustomInputDialog } from '../../../common/dialog'
 import { fileIo } from '@kit.CoreFileKit'
 import { PRIVACY_RECORDER_FOLDER } from '../../../common/constants'
+import { audioCapturerManager } from '../../../manager/AudioCapturerManager'
+import { privacyRecordingsDB } from '../../../database'
+import { it } from '@ohos/hypium'
 
 // 用于把毫秒格式化成 mm:ss 的相对时间插件
 dayjs.extend(duration)
 
 // 注意：隐私录音的数据库准备完毕后，请删除这个类型，否者类型可能会冲突
-export interface PrivacyRecorderDBInfo extends ValuesBucket {
+export interface PrivacyRecordingsDBInfo extends ValuesBucket {
   id: number | null // 新增时 id 为 null ，自动生成自增 id
   filePath: string
   title: string
@@ -21,10 +24,10 @@ export interface PrivacyRecorderDBInfo extends ValuesBucket {
 @Entry
 @Component
 struct RecorderIndexPage {
-  @State list: PrivacyRecorderDBInfo[] = []
+  @State list: PrivacyRecordingsDBInfo[] = []
   @State tempInputText: string = ''
   @State onConfirmEnable: boolean = true
-  @State activeItem: PrivacyRecorderDBInfo | null = null
+  @State activeItem: PrivacyRecordingsDBInfo | null = null
   @State isRecording: boolean = false
   @State isPlaying: boolean = false
   @State recordingTime: number = 0
@@ -37,6 +40,7 @@ struct RecorderIndexPage {
       inputText: this.tempInputText,
       onConfirm: async () => {
         // TODO：重命名录音
+        this.renameTheRecording()
       },
     }),
     autoCancel: true,
@@ -46,9 +50,11 @@ struct RecorderIndexPage {
   private playingTimerId: number = -1
   private recordingTimerId: number = -1
 
-  aboutToAppear(): void {
+  async aboutToAppear(): Promise<void> {
     // 初始化录音的存放文件夹
+    await audioCapturerManager.requestPermissions()
     this.initFolder()
+    this.getList()
   }
 
   // 创建文件夹
@@ -65,12 +71,49 @@ struct RecorderIndexPage {
 
   // 开始录音
   startRecording() {
+    // 1. 显示录音面板
     this.isRecording = true
+    // 2. 开启计时效果
+    this.startTheTimer()
+    // 3. 开启录音采集器，同时准备好文件路径
+    const context = getContext()
+    // 检查录音文件录音路径，路径拼接时特别容易出错
+    const filePath = context.filesDir + '/' + PRIVACY_RECORDER_FOLDER + '/' + Date.now() + '.wav'
+    if (AppStorage.get("phoneName") !== "emulator") {
+      audioCapturerManager.startCapturer(filePath)
+    }
   }
 
   // 结束录音
-  endTheRecording() {
+  async endTheRecording() {
+    // 1. 隐藏录音面板
     this.isRecording = false
+    // 2. 结束计时效果
+    this.endTheTimer()
+
+    if (AppStorage.get("phoneName") !== "emulator") {
+      // 3. 结束录音采集器，返回录音的关键信息
+      const audioInfo = await audioCapturerManager.stopCapturer()
+      // 4. 把录音的关键信息写入数据库中
+      await privacyRecordingsDB.setData<PrivacyRecordingsDBInfo>({
+        id: null,
+        filePath: audioInfo.filePath,
+        title: '录音文件' + audioInfo.date_added,
+        date_added: audioInfo.date_added,
+        duration: audioInfo.duration
+      })
+    } else {
+      const filename = Date.now()
+      await privacyRecordingsDB.setData<PrivacyRecordingsDBInfo>({
+        id: null,
+        filePath: `${filename}.wav`,
+        title: '录音文件' + `${dayjs(filename).format("YYYY-MM-DD HH:mm:ss")}`,
+        date_added: filename,
+        duration: this.recordingTime * 1000
+      })
+    }
+    // 5. 查询数据库，更新隐私录音列表的视图
+    this.getList()
   }
 
   // 开启计时
@@ -85,6 +128,54 @@ struct RecorderIndexPage {
   // 结束计时
   endTheTimer() {
     clearInterval(this.recordingTimerId)
+  }
+
+  // 获取列表
+  async getList() {
+    this.list = await privacyRecordingsDB.getTheList()
+  }
+
+  // 播放录音
+  playTheRecording(item: PrivacyRecordingsDBInfo) {
+    this.activeItem = item
+    this.playingTime = 0
+    this.playingTimerId = setInterval(() => {
+      this.playingTime += 20
+      if (this.playingTime > item.duration) {
+        clearInterval(this.playingTimerId)
+      }
+    }, 20)
+    if (AppStorage.get("phoneName") !== "emulator") {
+      audioCapturerManager.startRenderer(item.filePath)
+    }
+  }
+
+  // 停止播放录音
+  stopPlayingTheRecording(item: PrivacyRecordingsDBInfo) {
+    this.activeItem = item
+    clearInterval(this.playingTimerId)
+    if (AppStorage.get("phoneName") !== "emulator") {
+      audioCapturerManager.stopRenderer()
+    }
+  }
+
+  // 删除录音
+  async deleteTheRecording(item: PrivacyRecordingsDBInfo) {
+    if (AppStorage.get("phoneName") !== "emulator") {
+      audioCapturerManager.stopRenderer()
+    }
+    await privacyRecordingsDB.delData(item.id as number)
+    this.getList()
+    fileIo.unlink(item.filePath)
+  }
+
+  // 重命名
+  renameTheRecording() {
+    privacyRecordingsDB.upData(this.activeItem?.id as number, {
+      title: this.tempInputText
+    } as PrivacyRecordingsDBInfo)
+
+    // fileIo.rename(this.activeItem?.filePath,)
   }
 
   @Builder
@@ -111,6 +202,7 @@ struct RecorderIndexPage {
         .backgroundColor('#CECFCF')
         .onClick(() => {
           // TODO：录音重命名
+          this.dialogController.open()
         })
       Button("删除")
         .type(ButtonType.Normal)
@@ -119,6 +211,7 @@ struct RecorderIndexPage {
         .backgroundColor('#FF5E5D')
         .onClick(() => {
           // TODO：删除录音
+          this.deleteTheRecording(this.activeItem as PrivacyRecordingsDBInfo)
         })
     }
     .height('100%')
@@ -132,7 +225,7 @@ struct RecorderIndexPage {
           if (this.list.length) {
             List() {
               ListItemGroup() {
-                ForEach(this.list, (item: PrivacyRecorderDBInfo) => {
+                ForEach(this.list, (item: PrivacyRecordingsDBInfo) => {
                   ListItem() {
                     Row({ space: 20 }) {
                       Column({ space: 10 }) {
@@ -181,6 +274,12 @@ struct RecorderIndexPage {
                       .height('100%')
                       .onClick(() => {
                         // TODO：播放音频
+                        this.isPlaying = !this.isPlaying
+                        if (this.isPlaying) {
+                          this.playTheRecording(item)
+                        } else {
+                          this.stopPlayingTheRecording(item)
+                        }
                       })
                     }
                     .width('100%')
@@ -228,7 +327,6 @@ struct RecorderIndexPage {
             .onClick(() => {
               // TODO：开始录音
               this.startRecording()
-              this.startTheTimer()
             })
         }
         .width('100%')
@@ -291,7 +389,6 @@ struct RecorderIndexPage {
               .onClick(() => {
                 // TODO：停止录音
                 this.endTheRecording()
-                this.endTheTimer()
               })
           }
           .padding({ left: 15, right: 15 })

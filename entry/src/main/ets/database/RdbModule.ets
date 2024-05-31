@@ -8,14 +8,33 @@ export interface PrivacyNoteDBInfo extends ValuesBucket {
   date_added: number
 }
 
-// 数据库名和表名
+export interface PrivacyRecordingsDBInfo extends ValuesBucket {
+  id: number | null
+  filePath: string
+  title: string
+  date_added: number
+  duration: number
+}
+
+// 隐私笔记 数据库名和表名
 const privacyNotes = 'privacy_note'
-// 创建数据库的语句
-const sqlCreate = `CREATE TABLE IF NOT EXISTS ${privacyNotes} (
+// 隐私笔记 创建数据库的语句
+const privacyNotes_sqlCreate = `CREATE TABLE IF NOT EXISTS ${privacyNotes} (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT NOT NULL,
         content TEXT NOT NULL,
         date_added INTEGER NOT NULL
+      )`
+
+// 隐私录音 数据库名和表名
+const privacyRecordings = 'privacy_recordings'
+// 隐私笔记 创建数据库的语句
+const privacyRecordings_sqlCreate = `CREATE TABLE IF NOT EXISTS ${privacyRecordings} (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        filePath TEXT NOT NULL,
+        title TEXT NOT NULL,
+        date_added INTEGER NOT NULL,
+        duration INTEGER NOT NULL
       )`
 
 
@@ -104,4 +123,9 @@ class RdbModule {
 
 // 创建RdbModule实例，并传入表名、创建语句和安全等级
 // 如果需要多个数据库，可以导出多个实例
-export const privacyNoteDB = new RdbModule(privacyNotes, sqlCreate, relationalStore.SecurityLevel.S1);
+// 隐私笔记数据库实例
+export const privacyNoteDB = new RdbModule(privacyNotes, privacyNotes_sqlCreate, relationalStore.SecurityLevel.S1);
+
+// 隐私录音数据库实例
+export const privacyRecordingsDB =
+  new RdbModule(privacyRecordings, privacyRecordings_sqlCreate, relationalStore.SecurityLevel.S1);

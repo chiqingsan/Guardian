@@ -48,6 +48,7 @@
     "pages/Test/ImageCompression",
     "pages/Test/UserTextInput",
     "pages/Test/LodashTest",
-    "pages/Test/AudioTestPage"
+    "pages/Test/AudioTestPage",
+    "pages/Test/FaultLoggerTest"
   ]
 }

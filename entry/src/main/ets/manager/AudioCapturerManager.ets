@@ -96,7 +96,7 @@ class AudioCapturerManager {
       // 累加偏移值
       bufferSize += buffer.byteLength
       // 测试用的提示，项目上线时记得删除 !!!
-      promptAction.showToast({ message: '文件大小:' + formatByteLength(bufferSize) })
+      // promptAction.showToast({ message: '文件大小:' + formatByteLength(bufferSize) })
     })
     // 3. 开始录音采集
     audioCapturer.start()
@@ -156,7 +156,7 @@ class AudioCapturerManager {
       // 累加偏移量
       bufferSize += buffer.byteLength
       // 测试用的，封装完成记得删除
-      promptAction.showToast({ message: '文件大小:' + formatByteLength(bufferSize) })
+      // promptAction.showToast({ message: '文件大小:' + formatByteLength(bufferSize) })
       // 如果偏移量已经超过文件大小，可以停止播放
       if (bufferSize >= stat.size) {
         await audioRenderer.stop() // 停止渲染器(播放器)

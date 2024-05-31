@@ -1,1 +1,1 @@
-export * from "./PrivacyNoteDB"
+export * from "./RdbModule"
