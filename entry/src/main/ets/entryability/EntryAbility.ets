@@ -2,7 +2,8 @@ import { AbilityConstant, errorManager, UIAbility, Want } from '@kit.AbilityKit'
 import { router, window } from '@kit.ArkUI';
 import { FaultLogger, hilog } from '@kit.PerformanceAnalysisKit';
 import { deviceInfo } from '@kit.BasicServicesKit';
-import { PrivacySettings, PRIVACY_SETTINGS } from '../common/constants';
+import { BASE_URL, PrivacySettings, PRIVACY_SETTINGS } from '../common/constants';
+import axios from '@ohos/axios';
 
 let errorManagerId = -1
 
@@ -18,6 +19,7 @@ export default class EntryAbility extends UIAbility {
         // AlertDialog.show({
         //   message: JSON.stringify(errorInfo, null, 2)
         // })
+        await axios.post(BASE_URL + "/log/fault/report/single", errorInfo)
       }
     })
   }
@@ -36,7 +38,7 @@ export default class EntryAbility extends UIAbility {
     const phoneName = deviceInfo.marketName
     AppStorage.setOrCreate("phoneName", phoneName)
 
-    windowStage.loadContent('/pages/Test/FaultLoggerTest'.slice(1), (err) => {
+    windowStage.loadContent('/pages/Index'.slice(1), (err) => {
       if (err.code) {
         hilog.error(0x0000, 'testTag', 'Failed to load the content. Cause: %{public}s', JSON.stringify(err) ?? '');
         return;

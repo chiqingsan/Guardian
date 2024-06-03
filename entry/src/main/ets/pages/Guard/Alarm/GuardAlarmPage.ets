@@ -1,8 +1,10 @@
 import { themeManager } from '../../../manager'
+import { torchManager } from '../../../manager/TorchManager'
 
 @Entry
 @Component
 struct GuardAlarmPage {
+  @StorageProp("topHeight") topHeight: number = 0
   @State circleOpacity: number = 0.3
   @State circleHeight: number = 100
   @State currentVolume: number = 5
@@ -10,10 +12,27 @@ struct GuardAlarmPage {
 
   onPageShow() {
     themeManager.settingStatusBarWhite()
+    this.blinkTorch()
   }
 
   onPageHide() {
     themeManager.settingStatusBarBlack()
+    // 闪光灯属于硬件调用，不会随着页面销毁而自动关闭，需要手动关闭
+    // 页面卸载，记得关闭闪光灯，清理定时器
+    this.closeTorch()
+  }
+
+  // 闪光灯闪烁
+  blinkTorch() {
+    this.intervalID = setInterval(() => {
+      torchManager.toggleTorch()
+    }, 100)
+  }
+
+  // 关闭闪光灯
+  closeTorch() {
+    clearInterval(this.intervalID)
+    torchManager.closeTorch()
   }
 
   build() {
@@ -59,6 +78,7 @@ struct GuardAlarmPage {
             .backgroundColor('#fff')
             .onClick(() => {
               // TODO: 结束警报
+              this.closeTorch()
             })
         }
         .padding({ left: 20, right: 20, bottom: 30 })
@@ -67,6 +87,7 @@ struct GuardAlarmPage {
     }
     .titleMode(NavigationTitleMode.Mini)
     .mode(NavigationMode.Stack)
+    .padding({ top: this.topHeight })
     .backButtonIcon($r('app.media.ic_public_back_white'))
     .linearGradient({
       angle: 180,

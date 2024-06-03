@@ -4,6 +4,7 @@ import { sensor } from '@kit.SensorServiceKit'
 @Entry
 @Component
 struct IndoorCheckMovePage {
+  @StorageProp("topHeight") topHeight: number = 0
   // 动画旋转角度
   @State gradientRotateAngle: number = 0
   // 是否静止状态
@@ -16,6 +17,65 @@ struct IndoorCheckMovePage {
     .height(150)
     .aspectRatio(1)
     .borderRadius(150 / 2)
+  }
+
+  aboutToAppear() {
+    this.startSensor()
+  }
+
+  aboutToDisappear() {
+    this.stopSensor()
+  }
+
+  // 检测移动，比较前后传感器数据
+  checkStatic(val: sensor.AccelerometerResponse, oldVal: sensor.AccelerometerResponse) {
+    return (
+      Math.abs(val.x - oldVal.x) <= 1 &&
+        Math.abs(val.y - oldVal.y) <= 1 &&
+        Math.abs(val.z - oldVal.z) <= 1
+    )
+  }
+
+  // 订阅传感器
+  startSensor() {
+    try {
+      // 加速度传感器
+      sensor.on(sensor.SensorId.ACCELEROMETER, (data) => {
+        // 1. 先记录初始值
+        if (this.sensorResponse === null) {
+          this.sensorResponse = data
+          return
+        }
+        //  当前值 与 旧值 比较
+        if (this.checkStatic(data, this.sensorResponse)) {
+          this.isStatic = true
+        } else {
+          // 动的状态
+          // 手机移动：由静到动情况，需要警报
+          if (this.isStatic === true) {
+            // 停止传感器
+            this.stopSensor()
+            // 跳转页面
+            router.replaceUrl({ url: 'pages/Guard/Alarm/GuardAlarmPage' })
+          }
+          this.isStatic = false
+        }
+        // 保存数据
+        this.sensorResponse = data
+      })
+    } catch (error) {
+      AlertDialog.show({ message: '手机硬件不支持' })
+    }
+  }
+
+  // 取消订阅传感器
+  stopSensor() {
+    try {
+      // 取消订阅加速度传感器
+      sensor.off(sensor.SensorId.ACCELEROMETER)
+    } catch (error) {
+      AlertDialog.show({ message: '手机硬件不支持' })
+    }
   }
 
   build() {
@@ -90,6 +150,7 @@ struct IndoorCheckMovePage {
       .width('100%')
       .height('100%')
     }
+    .padding({ top: this.topHeight })
     .titleMode(NavigationTitleMode.Mini)
     .mode(NavigationMode.Stack)
   }

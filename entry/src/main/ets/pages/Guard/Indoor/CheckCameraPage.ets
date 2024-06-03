@@ -1,10 +1,12 @@
-import { sensor } from '@kit.SensorServiceKit'
+import { sensor, vibrator } from '@kit.SensorServiceKit'
 import { NavigationTitleBuilder } from '../../../common/builders/index'
-import { themeManager } from '../../../manager/index'
+import { permissionManager, themeManager } from '../../../manager/index'
+import { promptAction } from '@kit.ArkUI'
 
 @Entry
 @Component
 struct CheckCameraPage {
+  @StorageProp("topHeight") topHeight: number = 0
   // 传感器数据
   @State sensorResponse: sensor.MagneticFieldResponse | null = null
   // 最大环境磁场强度，单位 : μT
@@ -14,12 +16,60 @@ struct CheckCameraPage {
   private alarmValue: number = 100
   private scroller: Scroller = new Scroller()
 
+  aboutToAppear(): void {
+    permissionManager.requestPermissions(["ohos.permission.VIBRATE"])
+  }
+
   onPageShow() {
     themeManager.settingStatusBarWhite()
   }
 
   onPageHide() {
-    themeManager.settingStatusBarBlack()
+    this.stopSensor()
+    this.stopVibration()
+  }
+
+  // 开启环境磁场传感器
+  startSensor() {
+    try {
+      sensor.on(sensor.SensorId.MAGNETIC_FIELD, (response) => {
+        // 保存传感器数据
+        this.sensorResponse = response
+        // 获取最大值
+        this.maxData = Math.max(Math.abs(response.x), Math.abs(response.y), Math.abs(response.z))
+        // 追加到数组中
+        this.dataList.push(this.maxData)
+        // 滚动到结束
+        this.scroller.scrollEdge(Edge.End)
+        // 超过阈值开启马达震动
+        if (this.maxData >= this.alarmValue) {
+          this.startVibration() // 马达震动
+        } else {
+          this.stopVibration() // 停止震动
+        }
+      }, { interval: 'normal' })
+    } catch {
+      promptAction.showDialog({ message: '硬件不支持' })
+    }
+  }
+
+  // 关闭环境磁场传感器
+  stopSensor() {
+    try {
+      sensor.off(sensor.SensorId.MAGNETIC_FIELD)
+    } catch {
+      //
+    }
+  }
+
+  // 开启震动
+  startVibration() {
+    vibrator.startVibration({ type: 'time', duration: 500 }, { id: 0, usage: 'alarm' })
+  }
+
+  // 关闭震动
+  stopVibration() {
+    vibrator.stopVibration()
   }
 
   build() {
@@ -64,6 +114,7 @@ struct CheckCameraPage {
     }
     .title(NavigationTitleBuilder('摄像头检测'))
     .hideBackButton(true)
+    .padding({ top: this.topHeight })
     .titleMode(NavigationTitleMode.Mini)
     .mode(NavigationMode.Stack)
     .backgroundColor($r('app.color.black'))

@@ -23,7 +23,7 @@
         "skills": [
           {
             "entities": [
-              "entity.system.home"
+              "entity.system.home",
             ],
             "actions": [
               "action.system.home"
@@ -97,6 +97,21 @@
       // 用户认证
       {
         "name": "ohos.permission.ACCESS_BIOMETRIC"
+      },
+      // 加速度传感器
+      {
+        "name": "ohos.permission.ACCELEROMETER"
+      },
+      {
+        "name": "ohos.permission.READ_PASTEBOARD",
+        "reason": "$string:permission_reason_contact",
+        "usedScene": {}
+      },
+      // 马达权限
+      {
+        "name": "ohos.permission.VIBRATE",
+        "reason": "$string:permission_reason_contact",
+        "usedScene": {}
       }
     ]
   }
