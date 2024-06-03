@@ -1,5 +1,7 @@
 import { themeManager } from '../../../manager'
+import { avPlayerManager } from '../../../manager/AVPlayerManager'
 import { torchManager } from '../../../manager/TorchManager'
+import { router } from '@kit.ArkUI'
 
 @Entry
 @Component
@@ -13,6 +15,8 @@ struct GuardAlarmPage {
   onPageShow() {
     themeManager.settingStatusBarWhite()
     this.blinkTorch()
+    // 页面显示，循环播放警报声音
+    this.playAlarm()
   }
 
   onPageHide() {
@@ -27,6 +31,18 @@ struct GuardAlarmPage {
     this.intervalID = setInterval(() => {
       torchManager.toggleTorch()
     }, 100)
+  }
+
+  // 播放警报声音-循环播放
+  playAlarm() {
+    avPlayerManager.playByRawSrc('lab_alarm.wav')
+    avPlayerManager.setLoop(true)
+  }
+
+  // 关闭警报声音
+  stopAlarm() {
+    avPlayerManager.stop()
+    router.back()
   }
 
   // 关闭闪光灯
@@ -79,6 +95,7 @@ struct GuardAlarmPage {
             .onClick(() => {
               // TODO: 结束警报
               this.closeTorch()
+              this.stopAlarm()
             })
         }
         .padding({ left: 20, right: 20, bottom: 30 })

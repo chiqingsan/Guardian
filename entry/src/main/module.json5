@@ -102,16 +102,9 @@
       {
         "name": "ohos.permission.ACCELEROMETER"
       },
-      {
-        "name": "ohos.permission.READ_PASTEBOARD",
-        "reason": "$string:permission_reason_contact",
-        "usedScene": {}
-      },
       // 马达权限
       {
-        "name": "ohos.permission.VIBRATE",
-        "reason": "$string:permission_reason_contact",
-        "usedScene": {}
+        "name": "ohos.permission.VIBRATE"
       }
     ]
   }

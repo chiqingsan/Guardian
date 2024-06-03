@@ -6,6 +6,7 @@ import userIAM_userAuth from '@ohos.userIAM.userAuth';
 import { BusinessError } from '@kit.BasicServicesKit'
 import userAuth from '@ohos.userIAM.userAuth'
 import { userAuthManager } from '../../../manager'
+import { vibrator } from '@kit.SensorServiceKit'
 
 @Entry
 @Component
@@ -158,6 +159,7 @@ struct AuthPatternLockPage {
             .enabled(this.isEnable)
             .onDotConnect(() => {
               // 密码输入选中宫格圆点时触发该回调
+              vibrator.startVibration({ type: "preset", effectId: "haptic.clock.timer", count: 1 }, { usage: "touch" })
               clearInterval(this.timeoutID)
               this.clearTheMessage()
             })

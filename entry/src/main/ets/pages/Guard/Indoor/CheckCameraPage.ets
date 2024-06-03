@@ -16,17 +16,21 @@ struct CheckCameraPage {
   private alarmValue: number = 100
   private scroller: Scroller = new Scroller()
 
-  aboutToAppear(): void {
-    permissionManager.requestPermissions(["ohos.permission.VIBRATE"])
-  }
-
   onPageShow() {
     themeManager.settingStatusBarWhite()
+    // this.increaseTheData()
+    this.startSensor()
   }
 
   onPageHide() {
     this.stopSensor()
     this.stopVibration()
+  }
+
+  increaseTheData() {
+    setInterval(() => {
+      this.dataList.push(Math.floor(Math.random() * 250 + 50))
+    }, 200)
   }
 
   // 开启环境磁场传感器
@@ -39,6 +43,8 @@ struct CheckCameraPage {
         this.maxData = Math.max(Math.abs(response.x), Math.abs(response.y), Math.abs(response.z))
         // 追加到数组中
         this.dataList.push(this.maxData)
+        // 数组过长时截取
+        this.dataList = this.dataList.length > 100 ? this.dataList.slice(-100) : this.dataList
         // 滚动到结束
         this.scroller.scrollEdge(Edge.End)
         // 超过阈值开启马达震动
@@ -47,7 +53,7 @@ struct CheckCameraPage {
         } else {
           this.stopVibration() // 停止震动
         }
-      }, { interval: 'normal' })
+      }, { interval: 10000000 }) // game
     } catch {
       promptAction.showDialog({ message: '硬件不支持' })
     }
@@ -98,6 +104,7 @@ struct CheckCameraPage {
             })
           }
         }
+        .enabled(false)
         .scrollable(ScrollDirection.Horizontal)
         .scrollBarWidth(0)
       }

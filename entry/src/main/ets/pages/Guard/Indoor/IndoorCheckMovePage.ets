@@ -49,7 +49,7 @@ struct IndoorCheckMovePage {
         //  当前值 与 旧值 比较
         if (this.checkStatic(data, this.sensorResponse)) {
           this.isStatic = true
-          this.sensorResponse = data
+          // this.sensorResponse = data
         } else {
           // 动的状态
           // 手机移动：由静到动情况，需要警报
@@ -63,7 +63,7 @@ struct IndoorCheckMovePage {
         }
         // 保存数据
         this.sensorResponse = data
-      })
+      }, { interval: "game" })
     } catch (error) {
       AlertDialog.show({ message: '手机硬件不支持' })
     }
@@ -129,8 +129,8 @@ struct IndoorCheckMovePage {
             .fontColor($r('app.color.brand'))
           Text('保持手机静止，以激活防移动模式')
             .fontSize(14)
-          // Text('是否静止：' + this.isStatic)
-          // Text('传感器数据：' + JSON.stringify(this.sensorResponse))
+          Text('是否静止：' + this.isStatic)
+          Text('传感器数据：' + JSON.stringify(this.sensorResponse))
         }
         .justifyContent(FlexAlign.Center)
         .height('100%')
