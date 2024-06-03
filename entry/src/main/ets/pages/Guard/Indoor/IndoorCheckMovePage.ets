@@ -49,6 +49,7 @@ struct IndoorCheckMovePage {
         //  当前值 与 旧值 比较
         if (this.checkStatic(data, this.sensorResponse)) {
           this.isStatic = true
+          this.sensorResponse = data
         } else {
           // 动的状态
           // 手机移动：由静到动情况，需要警报
@@ -56,7 +57,7 @@ struct IndoorCheckMovePage {
             // 停止传感器
             this.stopSensor()
             // 跳转页面
-            router.replaceUrl({ url: 'pages/Guard/Alarm/GuardAlarmPage' })
+            router.replaceUrl({ url: 'pages/Guard/Alarm/CountdownPage' })
           }
           this.isStatic = false
         }

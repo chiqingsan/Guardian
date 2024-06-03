@@ -3,6 +3,7 @@ import { router } from '@kit.ArkUI'
 @Entry
 @Component
 struct CountdownPage {
+  @StorageProp("topHeight") topHeight: number = 0
   @State count: number = 0
   private intervalID: number = -1
 
@@ -91,6 +92,7 @@ struct CountdownPage {
     }
     .titleMode(NavigationTitleMode.Mini)
     .mode(NavigationMode.Stack)
+    .padding({ top: this.topHeight })
     .linearGradient({
       direction: 180,
       colors: [['#ffd8d6', 0], ['#ffffff', 1]]
