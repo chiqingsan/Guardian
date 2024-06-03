@@ -35,8 +35,7 @@ struct GuardAlarmPage {
 
   // 播放警报声音-循环播放
   playAlarm() {
-    avPlayerManager.playByRawSrc('lab_alarm.wav')
-    avPlayerManager.setLoop(true)
+    avPlayerManager.playByRawSrc('lab_alarm.wav', true)
   }
 
   // 关闭警报声音

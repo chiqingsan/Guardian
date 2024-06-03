@@ -1,7 +1,7 @@
 {
   "app": {
     "bundleName": "com.itheima.hm_guardian",
-    "patchVersionCode": 2000065,
+    "patchVersionCode": 2000067,
     "versionCode": 1000000
   },
   "module": {
