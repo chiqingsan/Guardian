@@ -1,35 +1,35 @@
 {
   "app": {
-    "signingConfigs": [
-      {
-        "name": "default",
-        "type": "HarmonyOS",
-        "material": {
-          "certpath": "C:\\Users\\chiqingsan\\.ohos\\config\\default_hm_guardian_XCwn72kfVdAL4Ogz_kG85pH3NmEBvOHNPHOd9IGgErI=.cer",
-          "storePassword": "0000001A814288CE3F86EC83305AB995EE84E4924AB92774D8C0664F59CA23EA72DEBDED9AA8204B927D",
-          "keyAlias": "debugKey",
-          "keyPassword": "0000001AD0B3DFCCF70ADBF0D38086065EAF0F2937D636149300C2D6E0FC0CA6940A4592D323B20856AE",
-          "profile": "C:\\Users\\chiqingsan\\.ohos\\config\\default_hm_guardian_XCwn72kfVdAL4Ogz_kG85pH3NmEBvOHNPHOd9IGgErI=.p7b",
-          "signAlg": "SHA256withECDSA",
-          "storeFile": "C:\\Users\\chiqingsan\\.ohos\\config\\default_hm_guardian_XCwn72kfVdAL4Ogz_kG85pH3NmEBvOHNPHOd9IGgErI=.p12"
-        }
-      }
-    ],
     "products": [
       {
         "name": "default",
         "signingConfig": "default",
         "compileSdkVersion": "4.1.0(11)",
         "compatibleSdkVersion": "4.1.0(11)",
-        "runtimeOS": "HarmonyOS",
+        "runtimeOS": "HarmonyOS"
       }
     ],
     "buildModeSet": [
       {
-        "name": "debug",
+        "name": "debug"
       },
       {
         "name": "release"
+      }
+    ],
+    "signingConfigs": [
+      {
+        "name": "default",
+        "type": "HarmonyOS",
+        "material": {
+          "storePassword": "0000001A3C6F28EE0ECF85BC259A1B2A7123A9E94D414AD7C36AA535ADEEF26DC35F37C7F134688E3D35",
+          "certpath": "D:/Harmony/AppKey/chiqingsan.cer",
+          "keyAlias": "debug_key",
+          "keyPassword": "0000001A560697357809A13DAE7BB796257B5139A73D2B92B3215099DCAAF175AF0F619067563BF1E0ED",
+          "profile": "D:/Harmony/AppKey/chiqingsanDebug.p7b",
+          "signAlg": "SHA256withECDSA",
+          "storeFile": "D:/Harmony/AppKey/chiqingsan.p12"
+        }
       }
     ]
   },

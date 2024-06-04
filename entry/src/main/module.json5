@@ -73,27 +73,27 @@
         "usedScene": {}
       },
       // 照片和视频修改权限
-      {
-        "name": "ohos.permission.WRITE_IMAGEVIDEO",
-        "reason": "$string:permission_WRITE_IMAGEVIDEO",
-        "usedScene":{}
-      },
-      {
-        "name": 'ohos.permission.READ_IMAGEVIDEO',
-        "reason": "$string:permission_WRITE_IMAGEVIDEO",
-        "usedScene": {}
-      },
-      // 通讯录权限
-      {
-        "name": 'ohos.permission.READ_CONTACTS',
-        "reason": "$string:permission_reason_contact",
-        "usedScene": {}
-      },
-      {
-        "name": 'ohos.permission.WRITE_CONTACTS',
-        "reason": "$string:permission_reason_contact",
-        "usedScene": {}
-      },
+//      {
+//        "name": "ohos.permission.WRITE_IMAGEVIDEO",
+//        "reason": "$string:permission_WRITE_IMAGEVIDEO",
+//        "usedScene":{}
+//      },
+//      {
+//        "name": 'ohos.permission.READ_IMAGEVIDEO',
+//        "reason": "$string:permission_WRITE_IMAGEVIDEO",
+//        "usedScene": {}
+//      },
+//      // 通讯录权限
+//      {
+//        "name": 'ohos.permission.READ_CONTACTS',
+//        "reason": "$string:permission_reason_contact",
+//        "usedScene": {}
+//      },
+//      {
+//        "name": 'ohos.permission.WRITE_CONTACTS',
+//        "reason": "$string:permission_reason_contact",
+//        "usedScene": {}
+//      },
       // 用户认证
       {
         "name": "ohos.permission.ACCESS_BIOMETRIC"

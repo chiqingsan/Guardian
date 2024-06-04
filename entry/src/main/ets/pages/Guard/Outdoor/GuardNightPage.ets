@@ -1,12 +1,13 @@
 import { Permissions } from '@kit.AbilityKit'
 import { promptAction, router } from '@kit.ArkUI'
 import { AsyncCallback } from '@kit.BasicServicesKit'
-import { map, mapCommon, MapComponent } from '@kit.MapKit'
+import { map, mapCommon, MapComponent, sceneMap } from '@kit.MapKit'
 import { webSocket } from '@kit.NetworkKit'
 import { locationManager, themeManager } from '../../../manager'
 import { call } from '@kit.TelephonyKit'
 import { getEmergencyContactAPI } from '../../../aip'
 import { torchManager } from '../../../manager/TorchManager'
+import { geoLocationManager } from '@kit.LocationKit'
 
 @Entry
 @Component
@@ -15,7 +16,7 @@ struct GuardNightPage {
   @StorageLink('bottomHeight') bottomHeight: number = 0
   @State isShowMap: boolean = false
   @State placeName: string = ''
-  @State emergencyPhone: string = ''
+  @State emergencyPhone: string = ""
   private permissions: Permissions[] = [
     'ohos.permission.APPROXIMATELY_LOCATION',
     'ohos.permission.LOCATION'
@@ -41,6 +42,12 @@ struct GuardNightPage {
     const res = await getEmergencyContactAPI()
     this.placeName = res.data.result.name
     this.emergencyPhone = res.data.result.phone
+
+    this.listenLocationChange()
+  }
+
+  aboutToDisappear(): void {
+    this.cancelYourLocationSubscription()
   }
 
   onPageShow() {
@@ -59,6 +66,18 @@ struct GuardNightPage {
     } else {
       promptAction.showToast({ message: "当前设备不支持拨号" })
     }
+  }
+
+  listenLocationChange() {
+    geoLocationManager.on("locationChange", {
+      scenario: geoLocationManager.LocationRequestScenario.NAVIGATION
+    }, (location) => {
+      promptAction.showToast({ message: JSON.stringify(location, null, 2) })
+    })
+  }
+
+  cancelYourLocationSubscription() {
+    geoLocationManager.off("locationChange")
   }
 
   build() {
