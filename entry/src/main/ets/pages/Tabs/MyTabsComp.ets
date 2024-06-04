@@ -12,6 +12,8 @@ interface UsageItem {
   unit: string
 }
 
+PersistentStorage.persistProp(LOGIN_INFO, {})
+
 @Component
 export struct MyTabsComp {
   // 用户信息持久化

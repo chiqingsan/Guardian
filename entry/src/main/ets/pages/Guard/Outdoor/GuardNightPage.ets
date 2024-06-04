@@ -3,7 +3,7 @@ import { promptAction, router } from '@kit.ArkUI'
 import { AsyncCallback } from '@kit.BasicServicesKit'
 import { map, mapCommon, MapComponent } from '@kit.MapKit'
 import { webSocket } from '@kit.NetworkKit'
-import { themeManager } from '../../../manager'
+import { locationManager, themeManager } from '../../../manager'
 import { call } from '@kit.TelephonyKit'
 import { getEmergencyContactAPI } from '../../../aip'
 import { torchManager } from '../../../manager/TorchManager'
@@ -29,6 +29,9 @@ struct GuardNightPage {
   private wsReady: boolean = false;
 
   async aboutToAppear(): Promise<void> {
+    await locationManager.requestPermissions()
+
+
     const res = await getEmergencyContactAPI()
     this.placeName = res.data.result.name
     this.emergencyPhone = res.data.result.phone

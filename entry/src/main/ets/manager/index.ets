@@ -21,4 +21,5 @@ export * from "./CleanerManager"
 export * from "./ContactManager"
 
 export * from "./PasteboardManager"
+export * from "./LocationManager"
 

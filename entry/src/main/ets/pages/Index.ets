@@ -5,7 +5,6 @@ import { HomeTabsComp } from './Tabs/HomeTabsComp';
 import { MyTabsComp } from './Tabs/MyTabsComp';
 
 
-PersistentStorage.persistProp(LOGIN_INFO, {} as LoginInfoResponse)
 // 通过持久化存储隐私空间的状态
 PersistentStorage.persistProp('isHidePrivacy', false)
 // 初始化隐私空间的设置信息,让StorageLink可以取到值
@@ -21,7 +20,6 @@ struct Index {
 
   onPageShow() {
     themeManager.enableFullScreen()
-    AlertDialog.show({ message: JSON.stringify(AppStorage.get(LOGIN_INFO), null, 2) })
   }
 
   onPageHide() {
