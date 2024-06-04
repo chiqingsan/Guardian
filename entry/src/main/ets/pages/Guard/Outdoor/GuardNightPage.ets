@@ -29,8 +29,14 @@ struct GuardNightPage {
   private wsReady: boolean = false;
 
   async aboutToAppear(): Promise<void> {
-    await locationManager.requestPermissions()
-
+    try {
+      await locationManager.requestPermissions()
+      const locationRes = await locationManager.getCurrentAddress()
+      AlertDialog.show({ message: JSON.stringify(locationRes, null, 2) })
+      console.log("GuardNightPage_locationRes:", JSON.stringify(locationRes))
+    } catch (e) {
+      console.log("GuardNightPage_e:", JSON.stringify(e))
+    }
 
     const res = await getEmergencyContactAPI()
     this.placeName = res.data.result.name
