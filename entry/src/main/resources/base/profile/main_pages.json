@@ -50,6 +50,7 @@
     "pages/Test/LodashTest",
     "pages/Test/AudioTestPage",
     "pages/Test/FaultLoggerTest",
-    "pages/Test/AVPlayerPage"
+    "pages/Test/AVPlayerPage",
+    "pages/Test/MapTestPage"
   ]
 }

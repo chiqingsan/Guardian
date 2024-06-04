@@ -87,6 +87,7 @@ struct UserLoginPage {
     this.loginInfo = res.data.result
     // 持久化数据
     MyPreferences.saveData(LOGIN_INFO, JSON.stringify(this.loginInfo))
+    AppStorage.setOrCreate(LOGIN_INFO, this.loginInfo)
     router.back({ url: "pages/Index" })
   }
 

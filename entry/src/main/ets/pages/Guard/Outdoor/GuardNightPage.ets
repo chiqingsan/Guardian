@@ -3,7 +3,7 @@ import { promptAction, router } from '@kit.ArkUI'
 import { AsyncCallback } from '@kit.BasicServicesKit'
 import { map, mapCommon, MapComponent, sceneMap } from '@kit.MapKit'
 import { webSocket } from '@kit.NetworkKit'
-import { locationManager, themeManager } from '../../../manager'
+import { locationManager, permissionManager, themeManager } from '../../../manager'
 import { call } from '@kit.TelephonyKit'
 import { getEmergencyContactAPI } from '../../../aip'
 import { torchManager } from '../../../manager/TorchManager'
@@ -29,27 +29,6 @@ struct GuardNightPage {
   private ws?: webSocket.WebSocket
   private wsReady: boolean = false;
 
-  async aboutToAppear(): Promise<void> {
-    try {
-      await locationManager.requestPermissions()
-      const locationRes = await locationManager.getCurrentAddress()
-      AlertDialog.show({ message: JSON.stringify(locationRes, null, 2) })
-      console.log("GuardNightPage_locationRes:", JSON.stringify(locationRes))
-    } catch (e) {
-      console.log("GuardNightPage_e:", JSON.stringify(e))
-    }
-
-    const res = await getEmergencyContactAPI()
-    this.placeName = res.data.result.name
-    this.emergencyPhone = res.data.result.phone
-
-    this.listenLocationChange()
-  }
-
-  aboutToDisappear(): void {
-    this.cancelYourLocationSubscription()
-  }
-
   onPageShow() {
     // 开启沉浸式
     themeManager.enableFullScreen()
@@ -60,24 +39,134 @@ struct GuardNightPage {
     themeManager.disableFullScreen()
   }
 
-  makeCall(phone: string) {
-    if (call.hasVoiceCapability()) {
-      call.makeCall(phone)
-    } else {
-      promptAction.showToast({ message: "当前设备不支持拨号" })
+  // 页面加载
+  async aboutToAppear() {
+    await this.requestPermissions()
+    // 获取紧急联系人
+    this.getEmergencyPhone()
+    // 初始化地图
+    this.initMap()
+  }
+
+  // 页面卸载
+  aboutToDisappear() {
+    // 关闭手电筒
+    torchManager.closeTorch()
+  }
+
+  // 定位权限
+  async requestPermissions() {
+    try {
+      // 申请权限
+      await permissionManager.requestPermissions(this.permissions)
+    } catch {
+      // 未开启弹窗提示
+      const dialogRes = await promptAction.showDialog({
+        alignment: DialogAlignment.Center,
+        title: '温馨提示',
+        message: '夜路守护功能需要获取定位权限，请在系统设置中打开定位开关',
+        buttons: [
+          { text: '取消', color: $r('app.color.font_sub') },
+          { text: '立即开启', color: $r('app.color.brand') }
+        ]
+      })
+      // 打开设置页
+      if (dialogRes.index === 1) {
+        permissionManager.openPermissionSettingsPage()
+      }
     }
   }
 
-  listenLocationChange() {
-    geoLocationManager.on("locationChange", {
-      scenario: geoLocationManager.LocationRequestScenario.NAVIGATION
-    }, (location) => {
-      promptAction.showToast({ message: JSON.stringify(location, null, 2) })
+  // 获取定位地址
+  async getPlaceName(location: geoLocationManager.Location) {
+    const res = await geoLocationManager.getAddressesFromLocation({
+      locale: 'zh',
+      latitude: location.latitude,
+      longitude: location.longitude,
+      maxItems: 1
     })
+    this.placeName = res?.[0].placeName || ''
   }
 
-  cancelYourLocationSubscription() {
-    geoLocationManager.off("locationChange")
+  // 设置地图上的定位点
+  async setCurrLocation(location: geoLocationManager.Location) {
+    // 设置定位点
+    this.mapController?.setMyLocation(location)
+    const target = await map.convertCoordinate(mapCommon.CoordinateType.WGS84, mapCommon.CoordinateType.GCJ02,
+      location)
+    const updateCamera = map.newCameraPosition({
+      target: target,
+      zoom: 16
+    })
+    this.mapController?.animateCamera(updateCamera)
+  }
+
+  initMap() {
+    // 地图配置
+    this.mapOption = {
+      position: {
+        target: { latitude: 39.9, longitude: 116.4 },
+        zoom: 10
+      },
+    }
+    // 显示地图
+    this.isShowMap = true
+    // 回调函数
+    this.callback = async (err, mapController) => {
+      if (err) {
+        promptAction.showToast({ message: '地图初始化出错' })
+        return
+      }
+      this.mapController = mapController
+      this.mapController.on('mapLoad', async () => {
+        // 启用我的位置图层
+        this.mapController?.setMyLocationEnabled(true)
+        // 启用我的位置按钮
+        this.mapController?.setMyLocationControlsEnabled(true)
+        const location = await geoLocationManager.getCurrentLocation()
+        // 获取定位地址信息
+        this.getPlaceName(location)
+        // 设置地图上的定位点
+        this.setCurrLocation(location)
+      })
+    }
+  }
+
+  // 获取紧急联系人
+  async getEmergencyPhone() {
+    const res = await getEmergencyContactAPI()
+    if (res.data.result.phone) {
+      this.emergencyPhone = res.data.result.phone
+      promptAction.showToast({ message: '已向您的紧急联系人发送夜路守护短信' })
+    } else {
+      promptAction.showToast({ message: '请设置紧急联系人' })
+    }
+  }
+
+  // 拨打电话
+  makePhoneCall(phoneNumber: string) {
+    if (!call.hasCallSync()) {
+      call.makeCall(phoneNumber)
+    }
+  }
+
+  // 停止保护
+  stopProtect() {
+    AlertDialog.show({
+      message: '确定要结束夜路守护吗？',
+      alignment: DialogAlignment.Center,
+      buttons: [
+        {
+          value: '取消', fontColor: $r('app.color.font_sub'), action: () => {
+        }
+        },
+        {
+          value: '确定', fontColor: $r('app.color.brand'), action: () => {
+          router.back()
+        }
+        }
+      ]
+    })
   }
 
   build() {
@@ -205,7 +294,7 @@ struct GuardNightPage {
                 HelpButton({ icon: $r('app.media.ic_guard_help_hjjjlxr'), text: '呼叫紧急联系人' })
                   .onClick(() => {
                     // TODO：呼叫紧急联系人
-                    this.makeCall(this.emergencyPhone)
+                    this.makePhoneCall(this.emergencyPhone)
                   })
               }
 
@@ -220,7 +309,7 @@ struct GuardNightPage {
                 HelpButton({ icon: $r('app.media.ic_guard_help_110bj'), text: '110报警' })
                   .onClick(() => {
                     // TODO：拨打报警电话
-                    this.makeCall("110")
+                    this.makePhoneCall("110")
                   })
               }
             }

@@ -18,7 +18,7 @@ PersistentStorage.persistProp(LOGIN_INFO, {})
 @Component
 export struct MyTabsComp {
   // 用户信息持久化
-  @State loginInfo: LoginInfoResponse = {}
+  @StorageProp(LOGIN_INFO) loginInfo: LoginInfoResponse = {}
   @StorageLink('topHeight') topHeight: number = 0
   // @Provide 装饰器和 @Consume 装饰器：与后代组件双向同步
   @Consume("currentIndex") @Watch('onTabChange') TabsIndex: number

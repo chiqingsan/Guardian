@@ -112,6 +112,12 @@
       {
         "name": "ohos.permission.ACCESS_NOTIFICATION_POLICY"
       }
-    ]
+    ],
+    "metadata": [ // 配置如下信息
+      {
+        "name": "client_id",
+        "value": "111173795"  //配置为获取的Client ID
+      },
+      ]
   }
 }
