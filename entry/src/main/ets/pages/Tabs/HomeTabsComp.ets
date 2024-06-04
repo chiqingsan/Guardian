@@ -119,11 +119,6 @@ struct HomeEntry {
 }
 
 
-// 通过持久化存储隐私空间的状态
-PersistentStorage.persistProp('isHidePrivacy', false)
-// 初始化隐私空间的设置信息,让StorageLink可以取到值
-PersistentStorage.persistProp(PRIVACY_SETTINGS, {})
-
 @Component
 struct HomeShortcut {
   @StorageLink('isHidePrivacy') @Watch("toggleTheDisplay") isHidePrivacy: boolean = false

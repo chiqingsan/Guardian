@@ -3,8 +3,6 @@ import { PRIVACY_QUESTION_LIST, PRIVACY_SETTINGS, PrivacySettings } from '../../
 import { promptAction, router } from '@kit.ArkUI';
 import { encryptMD5 } from '../../../manager/encryptMD5';
 
-// 初始化持久化存储
-PersistentStorage.persistProp<PrivacySettings>(PRIVACY_SETTINGS, {})
 
 interface RouterParams {
   patternPassword?: number[]

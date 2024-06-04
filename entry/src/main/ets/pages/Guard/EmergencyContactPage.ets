@@ -25,6 +25,7 @@ struct EmergencyContactPage {
         .fontColor(this.phone && this.name.length > 0 ? $r('app.color.font') : $r('app.color.font_sub'))
         .onClick(() => {
           // TODO：保存提交
+          this.onSubmit()
         })
     }
     .height('100%')
@@ -99,6 +100,7 @@ struct EmergencyContactPage {
             })
             .onSubmit(() => {
               // TODO：提交
+              this.onSubmit()
             })
         }
         .border({ width: { bottom: 1 }, color: $r('app.color.border') })

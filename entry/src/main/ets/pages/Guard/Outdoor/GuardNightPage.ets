@@ -1,9 +1,12 @@
 import { Permissions } from '@kit.AbilityKit'
-import { router } from '@kit.ArkUI'
+import { promptAction, router } from '@kit.ArkUI'
 import { AsyncCallback } from '@kit.BasicServicesKit'
 import { map, mapCommon, MapComponent } from '@kit.MapKit'
 import { webSocket } from '@kit.NetworkKit'
 import { themeManager } from '../../../manager'
+import { call } from '@kit.TelephonyKit'
+import { getEmergencyContactAPI } from '../../../aip'
+import { torchManager } from '../../../manager/TorchManager'
 
 @Entry
 @Component
@@ -25,6 +28,12 @@ struct GuardNightPage {
   private ws?: webSocket.WebSocket
   private wsReady: boolean = false;
 
+  async aboutToAppear(): Promise<void> {
+    const res = await getEmergencyContactAPI()
+    this.placeName = res.data.result.name
+    this.emergencyPhone = res.data.result.phone
+  }
+
   onPageShow() {
     // 开启沉浸式
     themeManager.enableFullScreen()
@@ -33,6 +42,14 @@ struct GuardNightPage {
   onPageHide() {
     // 关闭沉浸式
     themeManager.disableFullScreen()
+  }
+
+  makeCall(phone: string) {
+    if (call.hasVoiceCapability()) {
+      call.makeCall(phone)
+    } else {
+      promptAction.showToast({ message: "当前设备不支持拨号" })
+    }
   }
 
   build() {
@@ -126,6 +143,7 @@ struct GuardNightPage {
               ToolButton({ icon: $r('app.media.ic_guard_tool_sdt'), text: '手电筒' })
                 .onClick(() => {
                   // TODO：切换手电筒
+                  torchManager.toggleTorch()
                 })
               ToolButton({ icon: $r('app.media.ic_guard_tool_dyljb'), text: '大音量警报' })
                 .onClick(() => {
@@ -159,6 +177,7 @@ struct GuardNightPage {
                 HelpButton({ icon: $r('app.media.ic_guard_help_hjjjlxr'), text: '呼叫紧急联系人' })
                   .onClick(() => {
                     // TODO：呼叫紧急联系人
+                    this.makeCall(this.emergencyPhone)
                   })
               }
 
@@ -173,6 +192,7 @@ struct GuardNightPage {
                 HelpButton({ icon: $r('app.media.ic_guard_help_110bj'), text: '110报警' })
                   .onClick(() => {
                     // TODO：拨打报警电话
+                    this.makeCall("110")
                   })
               }
             }

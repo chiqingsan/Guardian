@@ -14,6 +14,7 @@ import { promptAction, router } from '@kit.ArkUI'
 @Entry
 @Component
 struct UserLoginPage {
+  @StorageProp("topHeight") topHeight: number = 0
   // 用户信息持久化
   @StorageLink(LOGIN_INFO) loginInfo: LoginInfoResponse = {}
   // 手机号
@@ -213,6 +214,7 @@ struct UserLoginPage {
       .width('100%')
       .height('100%')
     }
+    .padding({ top: this.topHeight })
     .titleMode(NavigationTitleMode.Mini)
     .mode(NavigationMode.Stack)
     .bindSheet($$this.isShowSheet, this.SheetBuilder(), {
