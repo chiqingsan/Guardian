@@ -33,13 +33,13 @@ class LocationManager {
     }
   }
 
-  // 获取当前位置
+  // 获取当前位置信息
   async getCurrentAddress() {
-    // 获取经纬度
+    // 1. 获取经纬度
     const location = await geoLocationManager.getCurrentLocation()
-    // 根据经纬度，调用逆地理编码服务，将坐标转换为地理描述（）
+    // 2. 把经纬度解析成地址
     const geoAddress = await geoLocationManager.getAddressesFromLocation({
-      locale: 'zh', //
+      locale: 'zh', // zh 中文信息
       latitude: location.latitude,
       longitude: location.longitude,
       maxItems: 1

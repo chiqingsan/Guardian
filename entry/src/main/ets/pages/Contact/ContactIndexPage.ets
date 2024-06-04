@@ -1,6 +1,6 @@
 import { router } from '@kit.ArkUI'
 import { NavigationTitleBuilder } from '../../common/builders'
-import { LOGIN_INFO } from '../../common/constants'
+import { LoginInfoResponse, LOGIN_INFO } from '../../common/constants'
 import { themeManager } from '../../manager'
 
 /** 登录响应 */
@@ -22,7 +22,7 @@ interface Item {
 @Component
 struct ContactIndexPage {
   // 同步持久化的用户信息
-  @StorageLink(LOGIN_INFO) loginInfo: LoginInfo = {};
+  @StorageLink(LOGIN_INFO) loginInfo: LoginInfoResponse = {};
   @State progress: number = 0
   private intervalID: number = -1
 

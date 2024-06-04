@@ -10,6 +10,8 @@ PersistentStorage.persistProp('isHidePrivacy', false)
 // 初始化隐私空间的设置信息,让StorageLink可以取到值
 PersistentStorage.persistProp(PRIVACY_SETTINGS, {})
 
+// PersistentStorage.persistProp(LOGIN_INFO, {})
+
 
 @Entry
 @Component
@@ -24,6 +26,7 @@ struct Index {
 
   onPageHide() {
     // themeManager.disableFullScreen()
+
   }
 
   @Builder

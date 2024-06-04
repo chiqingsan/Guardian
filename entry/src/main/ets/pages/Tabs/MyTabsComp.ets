@@ -4,6 +4,7 @@ import { batteryInfo, deviceInfo } from '@kit.BasicServicesKit'
 import { statfs } from '@kit.CoreFileKit'
 import { appManager } from '@kit.AbilityKit'
 import { hidebug } from '@kit.PerformanceAnalysisKit'
+import { MyPreferences } from '../../common/utils'
 
 interface UsageItem {
   icon: Resource
@@ -12,11 +13,12 @@ interface UsageItem {
   unit: string
 }
 
+PersistentStorage.persistProp(LOGIN_INFO, {})
 
 @Component
 export struct MyTabsComp {
   // 用户信息持久化
-  @StorageLink(LOGIN_INFO) loginInfo: LoginInfoResponse = {}
+  @State loginInfo: LoginInfoResponse = {}
   @StorageLink('topHeight') topHeight: number = 0
   // @Provide 装饰器和 @Consume 装饰器：与后代组件双向同步
   @Consume("currentIndex") @Watch('onTabChange') TabsIndex: number
@@ -56,7 +58,7 @@ export struct MyTabsComp {
     this.batteryState = batteryInfo.batterySOC
   }
 
-  aboutToAppear(): void {
+  async aboutToAppear(): Promise<void> {
     this.getDeviceName()
     console.info("型号:", this.deviceName)
     // 查询CPU占用率
@@ -67,6 +69,9 @@ export struct MyTabsComp {
     this.getStatfsSize()
     // 查询电量
     this.getBatteryState()
+    //持久化用户信息
+    this.loginInfo = JSON.parse(MyPreferences.getData(LOGIN_INFO, "")) as LoginInfoResponse
+    AppStorage.setOrCreate(LOGIN_INFO, this.loginInfo)
   }
 
   // 父组件下标变化时
@@ -84,6 +89,10 @@ export struct MyTabsComp {
       this.getStatfsSize()
       // 查询电量
       this.getBatteryState()
+
+      //持久化用户信息
+      this.loginInfo = JSON.parse(MyPreferences.getData(LOGIN_INFO, "")) as LoginInfoResponse
+      AppStorage.setOrCreate(LOGIN_INFO, this.loginInfo)
     }
   }
 
@@ -158,7 +167,7 @@ export struct MyTabsComp {
             if (this.loginInfo.accessToken) {
               // 已登录
               Column({ space: 10 }) {
-                Image(this.loginInfo.avatar || $r("app.media.ic_my_avatar_default"))
+                Image(this.loginInfo?.avatar || $r("app.media.ic_my_avatar_default"))
                   .height(70)
                   .aspectRatio(1)
                   .borderRadius(70 / 2)

@@ -7,8 +7,9 @@ import {
   postUserLoginPasswdAPI,
   postUserLoginVerifyCodeAPI
 } from '../../aip'
-import { BASE_URL, LOGIN_INFO } from '../../common/constants'
+import { BASE_URL, LOGIN_INFO, USER_SETTING } from '../../common/constants'
 import { promptAction, router } from '@kit.ArkUI'
+import { MyPreferences } from '../../common/utils'
 
 
 @Entry
@@ -16,7 +17,7 @@ import { promptAction, router } from '@kit.ArkUI'
 struct UserLoginPage {
   @StorageProp("topHeight") topHeight: number = 0
   // 用户信息持久化
-  @StorageLink(LOGIN_INFO) loginInfo: LoginInfoResponse = {}
+  loginInfo: LoginInfoResponse = {}
   // 手机号
   @State phoneNumber: string = '176884305000'
   // 短信验证码
@@ -84,6 +85,8 @@ struct UserLoginPage {
 
     // AlertDialog.show({ message: JSON.stringify(res, null, 2) })
     this.loginInfo = res.data.result
+    // 持久化数据
+    MyPreferences.saveData(LOGIN_INFO, JSON.stringify(this.loginInfo))
     router.back({ url: "pages/Index" })
   }
 
