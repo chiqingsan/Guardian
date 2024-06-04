@@ -1,4 +1,5 @@
 import { showDevelopingTips } from '../../../common/dev'
+import { avPlayerManager } from '../../../manager'
 
 interface Item {
   text: string
@@ -20,6 +21,19 @@ struct FakeVoiceIndexPage {
     { text: '你在原地等我一会，我马上就到', src: 'lab_voice_trick_6.m4a', time: 5 },
     { text: '还有多长时间呀？我来接你吧', src: 'lab_voice_trick_7.m4a', time: 4 },
   ]
+
+  // 页面隐藏停止播放
+  aboutToDisappear() {
+    avPlayerManager.stop()
+  }
+
+  // 播放录音
+  playVoice(item: Item) {
+    // 动画效果
+    this.playingSrc = item.src
+    // 播放音效
+    avPlayerManager.playByRawSrc(item.src)
+  }
 
   @Builder
   TitleBuilder(title: string, description: string) {
@@ -106,6 +120,7 @@ struct FakeVoiceIndexPage {
                   .margin({ left: 5 })
                   .onClick(() => {
                     // TODO: 点击播放声音 - 单次
+                    this.playVoice(item)
                   })
 
                   Text(item.text)

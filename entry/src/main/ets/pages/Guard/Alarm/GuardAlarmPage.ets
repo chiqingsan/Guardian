@@ -1,7 +1,8 @@
-import { themeManager } from '../../../manager'
+import { backgroundRunningManager, themeManager } from '../../../manager'
 import { avPlayerManager } from '../../../manager/AVPlayerManager'
 import { torchManager } from '../../../manager/TorchManager'
 import { router } from '@kit.ArkUI'
+import { audio } from '@kit.AudioKit'
 
 @Entry
 @Component
@@ -21,6 +22,14 @@ struct GuardAlarmPage {
 
   onPageHide() {
     themeManager.settingStatusBarBlack()
+
+  }
+
+  onBackPress(): boolean | void {
+    return true
+  }
+
+  aboutToDisappear(): void {
     // 闪光灯属于硬件调用，不会随着页面销毁而自动关闭，需要手动关闭
     // 页面卸载，记得关闭闪光灯，清理定时器
     this.closeTorch()
@@ -35,8 +44,13 @@ struct GuardAlarmPage {
   }
 
   // 播放警报声音-循环播放
-  playAlarm() {
+  async playAlarm() {
+    // 设置自动最大音量播放
+    // const audioManager = audio.getAudioManager()
+    // const maxV = await audioManager.getMaxVolume(audio.AudioVolumeType.MEDIA)
+    // await audioManager.setVolume(audio.AudioVolumeType.MEDIA, maxV)
     avPlayerManager.playByRawSrc('lab_alarm.wav', true)
+    backgroundRunningManager.startBackgroundRunning()
   }
 
   // 关闭警报声音

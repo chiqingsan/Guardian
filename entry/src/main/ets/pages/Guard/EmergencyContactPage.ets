@@ -1,8 +1,21 @@
+import { postEmergencyContactAPI } from '../../aip'
+import { promptAction, router } from '@kit.ArkUI'
+
 @Entry
 @Component
 struct EmergencyContactPage {
-  @State name: string = ''
-  @State phone: string = ''
+  @StorageProp("topHeight") topHeight: number = 0
+  @State name: string = '孙悟空123'
+  @State phone: string = '176880088008'
+
+  async onSubmit() {
+    await postEmergencyContactAPI({
+      name: this.name,
+      phone: this.phone
+    })
+    promptAction.showToast({ message: "设置成功" })
+    router.back()
+  }
 
   @Builder
   NavigationMenus() {
@@ -92,6 +105,7 @@ struct EmergencyContactPage {
       }
       .padding({ left: 15, right: 15 })
     }
+    .padding({ top: this.topHeight })
     .titleMode(NavigationTitleMode.Mini)
     .mode(NavigationMode.Stack)
     .menus(this.NavigationMenus())

@@ -1,6 +1,6 @@
 import { router } from '@kit.ArkUI'
 import dayjs from 'dayjs'
-import { themeManager } from '../../../manager'
+import { avPlayerManager, themeManager } from '../../../manager'
 
 interface ButtonItem {
   name: string
@@ -10,6 +10,7 @@ interface ButtonItem {
 @Entry
 @Component
 struct FakeTelPage {
+  @StorageProp("topHeight") topHeight: number = 0
   @State isAnswering: boolean = false
   @State count: number = 0
   @State buttonList: ButtonItem[] = [
@@ -28,6 +29,20 @@ struct FakeTelPage {
 
   onPageHide() {
     themeManager.settingStatusBarBlack()
+  }
+
+  aboutToAppear(): void {
+    avPlayerManager.playByRawSrc("lab_call_ring.mp3", true)
+    clearInterval(this.intervalID)
+  }
+
+  // 监听通话
+  answerCall() {
+    this.isAnswering = true
+    this.intervalID = setInterval(() => {
+      this.count++
+    }, 1000)
+    avPlayerManager.playByRawSrc('lab_voice_trick_4.m4a')
   }
 
   build() {
@@ -119,6 +134,7 @@ struct FakeTelPage {
               }
               .onClick(() => {
                 // TODO: 接听
+                this.answerCall()
               })
             }
             .width('100%')
@@ -129,6 +145,7 @@ struct FakeTelPage {
       .height('100%')
       .padding({ top: 50, bottom: 50 })
     }
+    .padding({ top: this.topHeight })
     .hideTitleBar(true)
     .linearGradient({
       angle: 180,
