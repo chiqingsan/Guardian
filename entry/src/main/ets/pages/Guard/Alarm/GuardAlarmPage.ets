@@ -24,6 +24,7 @@ struct GuardAlarmPage {
     // 闪光灯属于硬件调用，不会随着页面销毁而自动关闭，需要手动关闭
     // 页面卸载，记得关闭闪光灯，清理定时器
     this.closeTorch()
+    this.stopAlarm()
   }
 
   // 闪光灯闪烁
@@ -41,7 +42,6 @@ struct GuardAlarmPage {
   // 关闭警报声音
   stopAlarm() {
     avPlayerManager.stop()
-    router.back()
   }
 
   // 关闭闪光灯
@@ -95,6 +95,8 @@ struct GuardAlarmPage {
               // TODO: 结束警报
               this.closeTorch()
               this.stopAlarm()
+              router.back()
+
             })
         }
         .padding({ left: 20, right: 20, bottom: 30 })

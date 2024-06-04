@@ -129,8 +129,8 @@ struct IndoorCheckMovePage {
             .fontColor($r('app.color.brand'))
           Text('保持手机静止，以激活防移动模式')
             .fontSize(14)
-          Text('是否静止：' + this.isStatic)
-          Text('传感器数据：' + JSON.stringify(this.sensorResponse))
+          // Text('是否静止：' + this.isStatic)
+          // Text('传感器数据：' + JSON.stringify(this.sensorResponse))
         }
         .justifyContent(FlexAlign.Center)
         .height('100%')
